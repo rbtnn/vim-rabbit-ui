@@ -5,29 +5,41 @@ rabbit-ui.vim
 This is Rich UI Vim script Library.
 
 
-Packages
---------
-
 1. MessageBox
+-------------
+
 
 ![](https://raw.github.com/rbtnn/rabbit-ui.vim/master/messagebox.png)
 
+
+*Keys in MessageBox*
+
 * `q` key: quit messagebox.
 
+
+*SampleCode*
 
         let s:title = 'MessageBox'
         let s:text = 'Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text '
         call rabbit_ui#messagebox(s:title, s:text)
 
 
+
+
 2. Choices
+----------
 
 ![](https://raw.github.com/rbtnn/rabbit-ui.vim/master/choices.png)
+
+
+*Keys in Choices*
 
 * `j` key: down cursor.
 * `k` key: up cursor.
 * `q` key: quit choices.
 
+
+*SampleCode*
 
         let s:title = 'Choices'
         let s:items = [
