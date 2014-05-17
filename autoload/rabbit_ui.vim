@@ -1,9 +1,14 @@
 
 " Helper Funcions
 function! s:set_highlight()
-  highlight! default link TitleLine     Menu
-  highlight! default link TextLines     Pmenu
-  highlight! default link SelectedItem  PmenuSel
+  highlight! default link rabbituiTitleLine     Menu
+  highlight! default link rabbituiTextLines     Pmenu
+  highlight! default link rabbituiSelectedItem  PmenuSel
+endfunction
+function! s:clear_highlight()
+  syntax clear rabbituiTitleLine
+  syntax clear rabbituiSelectedItem
+  syntax clear rabbituiTextLines
 endfunction
 function! s:smart_split(str, boxwidth)
   let lines = []
@@ -39,11 +44,12 @@ function! s:wrapper(funcname, option)
   let saved_laststatus = &laststatus
   let saved_showtabline = &showtabline
   let saved_hlsearch = &hlsearch
+  let saved_currtabindex = tabpagenr()
   let rtn_value = ''
   try
 
     let background_lines = []
-    for line in getline(1, '$') + repeat([''], &lines)
+    for line in getline(line('w0'), line('w0') + &lines) + repeat([''], &lines)
       let background_lines += [
             \ join(map(split(line,'\zs'), 'strdisplaywidth(v:val) isnot 1 ? ".." : v:val'), '')
             \ ]
@@ -69,6 +75,7 @@ function! s:wrapper(funcname, option)
     let &l:laststatus = saved_laststatus
     let &l:showtabline = saved_showtabline
     let &l:hlsearch = saved_hlsearch
+    execute 'tabnext' . saved_currtabindex
     redraw
   endtry
 
@@ -92,15 +99,17 @@ endfunction
 function! s:wrapper_f_messagebox(option)
   let background_lines = get(a:option, 'background_lines', [])
 
-  while 1
+  % delete _
+  silent! put=background_lines
+  1 delete _
 
-    % delete _
-    silent! put=background_lines
-    1 delete _
+  call s:set_highlight()
+
+  while 1
 
     let rtn_value = s:redraw_messagebox(a:option)
 
-    redraw!
+    redraw
 
     let c_nr = getchar()
 
@@ -121,6 +130,8 @@ function! s:redraw_messagebox(option)
   let box_bottom =  a:option['box_bottom']
   let box_width = a:option['box_width']
 
+  call s:clear_highlight()
+
   for line_num in range(box_top, box_bottom)
     let text = get([title] + text_lines, (line_num - box_top), repeat(' ', box_width))
 
@@ -132,14 +143,13 @@ function! s:redraw_messagebox(option)
     let len = len(substitute(text, ".", "x", "g"))
 
     if line_num is box_top
-      execute 'syntax match TitleLine /^\%' . line_num . 'l.\{1,' . box_left . '}\zs.\{1,' . len . '}\ze.*$/ containedin=ALL'
+      execute 'syntax match rabbituiTitleLine /^\%' . line_num . 'l.\{1,' . box_left . '}\zs.\{1,' . len . '}\ze.*$/ containedin=ALL'
     else
-      execute 'syntax match TextLines /^\%' . line_num . 'l.\{1,' . box_left . '}\zs.\{1,' . len . '}\ze.*$/ containedin=ALL'
+      execute 'syntax match rabbituiTextLines /^\%' . line_num . 'l.\{1,' . box_left . '}\zs.\{1,' . len . '}\ze.*$/ containedin=ALL'
     endif
 
   endfor
 
-  call s:set_highlight()
 
   return 0
 endfunction
@@ -155,8 +165,8 @@ function! rabbit_ui#choices(title, items, ...)
   let option['box_height'] = option['box_bottom'] - option['box_top'] + 1
   let option['index'] = 0
   let option['display_offset'] = 0
-  let option['index_start'] = 0
-  let option['index_last'] = option['box_bottom'] - option['box_top'] - 1
+  let option['display_start'] = 0
+  let option['display_last'] = option['box_bottom'] - option['box_top'] - 1
   let option['title'] = s:smart_split(a:title, option['box_width'])[0]
   let option['text_items'] = map(a:items, 's:smart_split(v:val, option["box_width"])[0]')
 
@@ -165,35 +175,42 @@ endfunction
 function! s:wrapper_f_choices(option)
   let background_lines = get(a:option, 'background_lines', [])
 
+  % delete _
+  silent! put=background_lines
+  1 delete _
+
+  call s:set_highlight()
+
   while 1
-
-    % delete _
-    silent! put=background_lines
-    1 delete _
-
     let rtn_value = s:redraw_choices(a:option)
-
-    redraw!
+    redraw
 
     let c_nr = getchar()
 
     if char2nr('q') is c_nr
       break
+
+    elseif char2nr('g') is c_nr
+      let a:option['index'] = 0
+      let a:option['display_offset'] = 0
+
+    elseif char2nr('G') is c_nr
+      let a:option['index'] = len(a:option['text_items']) - 1
+      let a:option['display_offset'] = len(a:option['text_items']) - a:option['box_height'] + 1
+
     elseif char2nr('j') is c_nr
       if a:option['index'] + 1 <= len(a:option['text_items']) - 1
         let a:option['index'] += 1
       endif
-
-      if a:option['index_last'] < a:option['index'] - a:option['display_offset']
-        let a:option['display_offset'] = a:option['index'] - a:option['index_last']
+      if a:option['display_last'] < a:option['index'] - a:option['display_offset']
+        let a:option['display_offset'] = a:option['index'] - a:option['display_last']
       endif
     elseif char2nr('k') is c_nr
       if 0 <= a:option['index'] - 1
         let a:option['index'] -= 1
       endif
-
-      if a:option['index'] - a:option['display_offset'] < a:option['index_start']
-        let a:option['display_offset'] = a:option['index'] - a:option['index_start']
+      if a:option['index'] - a:option['display_offset'] < a:option['display_start']
+        let a:option['display_offset'] = a:option['index'] - a:option['display_start']
       endif
     endif
   endwhile
@@ -201,8 +218,6 @@ function! s:wrapper_f_choices(option)
   return rtn_value
 endfunction
 function! s:redraw_choices(option)
-  let title = a:option['title']
-  let text_items = a:option['text_items']
   let box_left = a:option['box_left']
   let box_right =  a:option['box_right']
   let box_top = a:option['box_top']
@@ -210,28 +225,30 @@ function! s:redraw_choices(option)
   let box_width = a:option['box_width']
   let index = a:option['index']
   let display_offset = a:option['display_offset']
+  let title = a:option['title']
+  let text_items = a:option['text_items'][(display_offset):(display_offset + a:option['box_height'])]
+
+  call s:clear_highlight()
 
   for line_num in range(box_top, box_bottom)
-    let text = get([title] + text_items[(display_offset):], (line_num - box_top), repeat(' ', box_width))
+    let text = get([title] + text_items, (line_num - box_top), repeat(' ', box_width))
 
     let str = getline(line_num)
     let str = str . repeat(' ', &columns - strdisplaywidth(str))
-    let str = str[:(box_left > 0 ? box_left - 1 : 0)] . text . str[(box_right):]
+    let str = str[:(box_left > 0 ? box_left - 1 : 0)] . text . str[(box_right + 1):]
     call setline(line_num, str)
 
     let len = len(substitute(text, ".", "x", "g"))
 
     if line_num is box_top
-      execute 'syntax match TitleLine /^\%' . line_num . 'l.\{1,' . box_left . '}\zs.\{1,' . len . '}\ze.*$/ containedin=ALL'
+      execute 'syntax match rabbituiTitleLine /^\%' . line_num . 'l.\{1,' . box_left . '}\zs.\{1,' . len . '}\ze.*$/ containedin=ALL'
     elseif line_num is box_top + 1 + index - display_offset
-      execute 'syntax match SelectedItem /^\%' . line_num . 'l.\{1,' . box_left . '}\zs.\{1,' . len . '}\ze.*$/ containedin=ALL'
+      execute 'syntax match rabbituiSelectedItem /^\%' . line_num . 'l.\{1,' . box_left . '}\zs.\{1,' . len . '}\ze.*$/ containedin=ALL'
     else
-      execute 'syntax match TextLines /^\%' . line_num . 'l.\{1,' . box_left . '}\zs.\{1,' . len . '}\ze.*$/ containedin=ALL'
+      execute 'syntax match rabbituiTextLines /^\%' . line_num . 'l.\{1,' . box_left . '}\zs.\{1,' . len . '}\ze.*$/ containedin=ALL'
     endif
 
   endfor
-
-  call s:set_highlight()
 
   return index
 endfunction
@@ -242,7 +259,7 @@ endfunction
 " echo rabbit_ui#messagebox(s:title, s:text)
 "
 " let s:title = 'Choices'
-" let s:items = [
+" let s:items = repeat([
 "       \ 'Dart',
 "       \ 'JavaScript',
 "       \ 'Vim script',
@@ -267,6 +284,8 @@ endfunction
 "       \ 'Elixir',
 "       \ 'Ada',
 "       \ 'Type Script',
-"       \ ]
+"       \ ], 1000)
+" for s:item_index in range(0, len(s:items) - 1)
+"   let s:items[(s:item_index)] = printf('%d. %s', s:item_index, s:items[(s:item_index)])
+" endfor
 " echo rabbit_ui#choices(s:title, s:items)
-"

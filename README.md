@@ -37,6 +37,8 @@ This is Rich UI Vim script Library.
 * `j` key: down cursor.
 * `k` key: up cursor.
 * `q` key: quit choices.
+* `g` key: move cursor to first item.
+* `G` key: move cursor to last item.
 
 
 *SampleCode*
