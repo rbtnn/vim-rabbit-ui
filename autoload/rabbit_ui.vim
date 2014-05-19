@@ -9,9 +9,9 @@ function! rabbit_ui#choices(title, items, ...)
   let option = ( 0 < a:0 ) ? (type(a:1) is type({}) ? a:1 : {}) : {}
   return rabbit_ui#components#choices#exec(a:title, a:items, option)
 endfunction
-function! rabbit_ui#twopane(A_title, A_items, B_title, B_items, ...)
+function! rabbit_ui#panel(title_and_items_list, ...)
   let option = ( 0 < a:0 ) ? (type(a:1) is type({}) ? a:1 : {}) : {}
-  return rabbit_ui#components#twopane#exec(a:A_title, a:A_items, a:B_title, a:B_items, option)
+  return rabbit_ui#components#panel#exec(a:title_and_items_list, option)
 endfunction
 
 function! rabbit_ui#run_testcases()
@@ -27,18 +27,18 @@ function! rabbit_ui#run_testcases()
         \ 'Ruby', 'Python', 'Haskell', 'HTML', 'css', 'Lisp', 'COBOL', 'Scheme',
         \ 'Scala', 'Lua', 'CoffeeScript', 'Common Lisp', 'Erlang',
         \ 'Elixir', 'Ada', 'Type Script', ]
+  let com_items = repeat(com_items, 100)
   for idx in range(0, len(com_items) - 1)
     let com_items[idx] = printf('%d. %s', idx, com_items[idx])
   endfor
-  let com_items = repeat(com_items, 100)
 
   let spo_items = [
         \ '英語', '中国語', '韓国語', 'フランス語', 'ロシア語', 'ポルトガル語', 'スペイン語',
         \ 'ドイツ語', 'イタリア語', ]
+  let spo_items = repeat(spo_items, 100)
   for idx in range(0, len(spo_items) - 1)
     let spo_items[idx] = printf('%d. %s', idx, spo_items[idx])
   endfor
-  let spo_items = repeat(spo_items, 100)
 
   let testcase_count = 1
   for items in [spo_items,com_items]
@@ -52,11 +52,17 @@ function! rabbit_ui#run_testcases()
     call rabbit_ui#choices(printf('testcase:%d (Choices)', testcase_count), items, option)
     let testcase_count += 1
   endfor
-  call rabbit_ui#twopane( printf('testcase:%d (TwoPane(A))', testcase_count), com_items,
-        \                 printf('testcase:%d (TwoPane(B))', testcase_count), spo_items)
+  call rabbit_ui#panel([
+        \ [ printf('testcase:%d', testcase_count), com_items ],
+        \ [ 'A', spo_items ],
+        \ [ 'B', com_items ],
+        \ [ 'C', spo_items ],
+        \ ])
   let testcase_count += 1
-  call rabbit_ui#twopane( printf('testcase:%d (TwoPane(A))', testcase_count), com_items,
-        \                 printf('testcase:%d (TwoPane(B))', testcase_count), spo_items, option)
+  call rabbit_ui#panel([
+        \ [ printf('testcase:%d (TwoPane(A))', testcase_count), com_items ],
+        \ [ printf('testcase:%d (TwoPane(B))', testcase_count), spo_items ],
+        \ ], option)
   let testcase_count += 1
 endfunction
 

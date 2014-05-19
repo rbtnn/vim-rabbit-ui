@@ -6,12 +6,14 @@ function! rabbit_ui#helper#exception(msg)
   throw printf('[%s] %s', rabbit_ui#helper#id(), a:msg)
 endfunction
 function! rabbit_ui#helper#redraw_line(line_num, box_left, text)
-  let line = getline(a:line_num)
-  let line .= repeat(' ', &columns - strdisplaywidth(line))
+  let orgline = getline(a:line_num)
+  let line = orgline . repeat(' ', &columns - strdisplaywidth(orgline))
   let str = rabbit_ui#helper#smart_split(line, a:box_left)[0]
   let str .= a:text
   let str .= line[(strdisplaywidth(str)):]
-  call setline(a:line_num, str)
+  if orgline isnot str
+    call setline(a:line_num, str)
+  endif
 endfunction
 function! rabbit_ui#helper#smart_split(str, boxwidth)
   let lines = []
