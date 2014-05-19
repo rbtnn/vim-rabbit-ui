@@ -54,19 +54,19 @@ This is Rich UI Vim script Library.
 
 
 
-3. TwoPain
+3. TwoPane
 ----------
 
-![](https://raw.github.com/rbtnn/rabbit-ui.vim/master/twopain.png)
+![](https://raw.github.com/rbtnn/rabbit-ui.vim/master/twopane.png)
 
 
 *Keys in Choices*
 
 * `j` key: down cursor.
 * `k` key: up cursor.
-* `h` key: move cursor to left pain.
-* `l` key: move cursor to right pain.
-* `q` key: quit twopain.
+* `h` key: move cursor to left pane.
+* `l` key: move cursor to right pane.
+* `q` key: quit twopane.
 * `g` key: move cursor to first item.
 * `G` key: move cursor to last item.
 

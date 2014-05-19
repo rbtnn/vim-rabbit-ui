@@ -1,5 +1,5 @@
 
-function! rabbit_ui#packages#twopain#exec(A_title, A_items, B_title, B_items, option)
+function! rabbit_ui#packages#twopane#exec(A_title, A_items, B_title, B_items, option)
   let option = a:option
 
   let option['box_top'] = abs(get(option, 'box_top', &lines / 4 * 1))
@@ -32,10 +32,10 @@ function! rabbit_ui#packages#twopain#exec(A_title, A_items, B_title, B_items, op
   let option['B_title'] = rabbit_ui#helper#smart_split(a:B_title, option['box_width'])[0]
   let option['B_text_items'] = map(a:B_items, 'rabbit_ui#helper#smart_split(v:val, option["box_width"])[0]')
 
-  return rabbit_ui#helper#wrapper(function('s:wrapper_f_twopain'), option)
+  return rabbit_ui#helper#wrapper(function('s:wrapper_f_twopane'), option)
 endfunction
 
-function! s:wrapper_f_twopain(option)
+function! s:wrapper_f_twopane(option)
   let background_lines = get(a:option, 'background_lines', [])
 
   while 1
@@ -43,7 +43,7 @@ function! s:wrapper_f_twopain(option)
     silent! put=background_lines
     1 delete _
 
-    let rtn_value = s:redraw_twopain(a:option)
+    let rtn_value = s:redraw_twopane(a:option)
     redraw
 
     let c_nr = getchar()
@@ -89,7 +89,7 @@ function! s:wrapper_f_twopain(option)
 
   return rtn_value
 endfunction
-function! s:redraw_twopain(option)
+function! s:redraw_twopane(option)
   let box_left = a:option['box_left']
   let box_right =  a:option['box_right']
   let box_top = a:option['box_top']

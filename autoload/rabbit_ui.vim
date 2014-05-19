@@ -9,9 +9,9 @@ function! rabbit_ui#choices(title, items, ...)
   let option = ( 0 < a:0 ) ? (type(a:1) is type({}) ? a:1 : {}) : {}
   return rabbit_ui#packages#choices#exec(a:title, a:items, option)
 endfunction
-function! rabbit_ui#twopain(A_title, A_items, B_title, B_items, ...)
+function! rabbit_ui#twopane(A_title, A_items, B_title, B_items, ...)
   let option = ( 0 < a:0 ) ? (type(a:1) is type({}) ? a:1 : {}) : {}
-  return rabbit_ui#packages#twopain#exec(a:A_title, a:A_items, a:B_title, a:B_items, option)
+  return rabbit_ui#packages#twopane#exec(a:A_title, a:A_items, a:B_title, a:B_items, option)
 endfunction
 
 function! rabbit_ui#run_testcases()
@@ -52,11 +52,11 @@ function! rabbit_ui#run_testcases()
     call rabbit_ui#choices(printf('testcase:%d (Choices)', testcase_count), items, option)
     let testcase_count += 1
   endfor
-  call rabbit_ui#twopain( printf('testcase:%d (TwoPain(A))', testcase_count), com_items,
-        \                 printf('testcase:%d (TwoPain(B))', testcase_count), spo_items)
+  call rabbit_ui#twopane( printf('testcase:%d (TwoPane(A))', testcase_count), com_items,
+        \                 printf('testcase:%d (TwoPane(B))', testcase_count), spo_items)
   let testcase_count += 1
-  call rabbit_ui#twopain( printf('testcase:%d (TwoPain(A))', testcase_count), com_items,
-        \                 printf('testcase:%d (TwoPain(B))', testcase_count), spo_items, option)
+  call rabbit_ui#twopane( printf('testcase:%d (TwoPane(A))', testcase_count), com_items,
+        \                 printf('testcase:%d (TwoPane(B))', testcase_count), spo_items, option)
   let testcase_count += 1
 endfunction
 
