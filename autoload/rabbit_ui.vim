@@ -3,15 +3,15 @@ scriptencoding utf-8
 
 function! rabbit_ui#messagebox(title, text, ...)
   let option = ( 0 < a:0 ) ? (type(a:1) is type({}) ? a:1 : {}) : {}
-  return rabbit_ui#packages#messagebox#exec(a:title, a:text, option)
+  return rabbit_ui#components#messagebox#exec(a:title, a:text, option)
 endfunction
 function! rabbit_ui#choices(title, items, ...)
   let option = ( 0 < a:0 ) ? (type(a:1) is type({}) ? a:1 : {}) : {}
-  return rabbit_ui#packages#choices#exec(a:title, a:items, option)
+  return rabbit_ui#components#choices#exec(a:title, a:items, option)
 endfunction
 function! rabbit_ui#twopane(A_title, A_items, B_title, B_items, ...)
   let option = ( 0 < a:0 ) ? (type(a:1) is type({}) ? a:1 : {}) : {}
-  return rabbit_ui#packages#twopane#exec(a:A_title, a:A_items, a:B_title, a:B_items, option)
+  return rabbit_ui#components#twopane#exec(a:A_title, a:A_items, a:B_title, a:B_items, option)
 endfunction
 
 function! rabbit_ui#run_testcases()

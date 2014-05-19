@@ -1,5 +1,5 @@
 
-function! rabbit_ui#packages#choices#exec(title, items, option)
+function! rabbit_ui#components#choices#exec(title, items, option)
   let option = a:option
 
   let option['box_top'] = abs(get(option, 'box_top', &lines / 4 * 1))

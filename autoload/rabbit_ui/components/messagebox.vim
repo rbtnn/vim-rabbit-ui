@@ -1,5 +1,5 @@
 
-function! rabbit_ui#packages#messagebox#exec(title, text, option)
+function! rabbit_ui#components#messagebox#exec(title, text, option)
   let option = a:option
 
   let option['box_top'] = abs(get(option, 'box_top', &lines / 4 * 1))
