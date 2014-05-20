@@ -109,14 +109,16 @@ function! rabbit_ui#helper#wrapper(funcname, option)
 endfunction
 function! rabbit_ui#helper#clear_highlights()
   call s:clear_highlight('rabbituiTitleLine')
-  call s:clear_highlight('rabbituiSelectedItem')
+  call s:clear_highlight('rabbituiSelectedItemActive')
+  call s:clear_highlight('rabbituiSelectedItemNoActive')
   call s:clear_highlight('rabbituiTextLines')
 endfunction
 function! rabbit_ui#helper#set_highlight(prefix_groupname, line, col, size)
   let table = {
         \   'rabbituiTitleLine' : 'Menu',
         \   'rabbituiTextLines' : 'Pmenu',
-        \   'rabbituiSelectedItem' : 'PmenuSel',
+        \   'rabbituiSelectedItemActive' : 'PmenuSel',
+        \   'rabbituiSelectedItemNoActive' : 'PmenuSbar',
         \ }
   if has_key(table, a:prefix_groupname)
     call s:set_highlight(a:prefix_groupname, table[(a:prefix_groupname)], a:line, a:col, a:size)

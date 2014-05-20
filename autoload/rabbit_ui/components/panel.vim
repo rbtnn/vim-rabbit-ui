@@ -163,8 +163,12 @@ function! s:redraw_panel(option, do_redraw)
 
       if line_num is (box_top + 1)
         let gname = 'rabbituiTitleLine'
-      elseif line_num is (box_top + 1) + 1 + item_index - display_offset
-        let gname = 'rabbituiSelectedItem'
+      elseif line_num is (box_top + 1) + (1 + item_index - display_offset)
+        if pane_index is a:option['selected_pane_index']
+          let gname = 'rabbituiSelectedItemActive'
+        else
+          let gname = 'rabbituiSelectedItemNoActive'
+        endif
       else
         let gname = 'rabbituiTextLines'
       endif
@@ -176,18 +180,3 @@ function! s:redraw_panel(option, do_redraw)
   return map(range(0, split_size - 1), "[ (a:option['item_index'][(v:val)]), (a:option['text_items'][(v:val)]) ]")
 endfunction
 
-let s:com = [
-      \ 'Dart', 'JavaScript', 'Vim script', 'Go', 'C', 'C++', 'Java', 'Perl',
-      \ 'Ruby', 'Python', 'Haskell', 'HTML', 'css', 'Lisp', 'COBOL', 'Scheme',
-      \ 'Scala', 'Lua', 'CoffeeScript', 'Common Lisp', 'Erlang',
-      \ 'Elixir', 'Ada', 'Type Script', ]
-let s:alp = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J' ]
-call rabbit_ui#panel([
-      \ ['Computer Languages', s:com],
-      \ ['Alphabets', s:alp],
-      \ ])
-
-" echo strdisplaywidth(rabbit_ui#helper#smart_split('あi', 4)[0])
-" let s:text = rabbit_ui#helper#smart_split('あiあa', 5)[0]
-" let s:len = len(substitute(s:text, ".", "x", "g"))
-" echo s:len
