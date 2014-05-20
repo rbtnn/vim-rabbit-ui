@@ -13,6 +13,10 @@ function! rabbit_ui#panel(title_and_items_list, ...)
   let option = ( 0 < a:0 ) ? (type(a:1) is type({}) ? a:1 : {}) : {}
   return rabbit_ui#components#panel#exec(a:title_and_items_list, option)
 endfunction
+function! rabbit_ui#gridview(data, ...)
+  let option = ( 0 < a:0 ) ? (type(a:1) is type({}) ? a:1 : {}) : {}
+  return rabbit_ui#components#gridview#exec(a:data, option)
+endfunction
 
 function! rabbit_ui#run_testcases()
   let option = {

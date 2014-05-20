@@ -143,3 +143,38 @@ This is Rich UI Vim script Library.
 
 
 
+
+4. GridView
+-----------
+
+![](https://raw.github.com/rbtnn/rabbit-ui.vim/master/gridview.png)
+
+
+*Keys in Choices*
+
+* `j` key: cursor down.
+* `k` key: cursor up.
+* `h` key: cursor left.
+* `l` key: cursor right.
+* `e` key: edit cell.
+* `q` key: quit panel.
+
+
+*SampleCode*
+
+    echo rabbit_ui#gridview([
+          \ ['','A','B','C'],
+          \ ['1',  5,  5,  6],
+          \ ['2',  7,  8,  9],
+          \ ['3',  7,  8,  9],
+          \ ])
+    " [
+    "   ['', 'A', 'B', 'C'],
+    "   ['1', 5, 5, 6],
+    "   ['2', 7, 8, 9],
+    "   ['3', 7, 8, 9],
+    "   ['', '', '', '', '', '', '234523'],
+    "   [],
+    "   ['', '', '', '', 'hoge', '', '', '', 'vim']
+    " ]
+
