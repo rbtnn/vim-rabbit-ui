@@ -92,6 +92,36 @@ function! s:wrapper_f_panel(option)
         let do_redraw = 1
       endif
 
+    elseif char2nr('H') is c_nr
+      if 0 < selected_pane_index
+        let from_selected_index = a:option['item_index'][selected_pane_index]
+        let to_selected_index = a:option['item_index'][selected_pane_index - 1]
+        let item = a:option['text_items'][selected_pane_index][from_selected_index]
+        let a:option['text_items'][selected_pane_index - 1] =
+              \ insert(a:option['text_items'][selected_pane_index - 1], item, to_selected_index)
+        call remove(a:option['text_items'][selected_pane_index], from_selected_index)
+        let size = len(a:option['text_items'][selected_pane_index])
+        if 0 < size && size <= from_selected_index
+          let a:option['item_index'][selected_pane_index] = size - 1
+        endif
+        let do_redraw = 1
+      endif
+
+    elseif char2nr('L') is c_nr
+      if selected_pane_index < a:option['split_size'] - 1
+        let from_selected_index = a:option['item_index'][selected_pane_index]
+        let to_selected_index = a:option['item_index'][selected_pane_index + 1]
+        let item = a:option['text_items'][selected_pane_index][from_selected_index]
+        let a:option['text_items'][selected_pane_index + 1] =
+              \ insert(a:option['text_items'][selected_pane_index + 1], item, to_selected_index)
+        call remove(a:option['text_items'][selected_pane_index], from_selected_index)
+        let size = len(a:option['text_items'][selected_pane_index])
+        if 0 < size && size <= from_selected_index
+          let a:option['item_index'][selected_pane_index] = size - 1
+        endif
+        let do_redraw = 1
+      endif
+
     endif
   endwhile
 
@@ -146,23 +176,18 @@ function! s:redraw_panel(option, do_redraw)
   return map(range(0, split_size - 1), "[ (a:option['item_index'][(v:val)]), (a:option['text_items'][(v:val)]) ]")
 endfunction
 
-    " let s:com = [
-    "       \ 'Dart', 'JavaScript', 'Vim script', 'Go', 'C', 'C++', 'Java', 'Perl',
-    "       \ 'Ruby', 'Python', 'Haskell', 'HTML', 'css', 'Lisp', 'COBOL', 'Scheme',
-    "       \ 'Scala', 'Lua', 'CoffeeScript', 'Common Lisp', 'Erlang',
-    "       \ 'Elixir', 'Ada', 'Type Script', ]
-    " let s:alp = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J' ]
-    " let s:spo = [
-    "       \ '英語', '中国語', '韓国語', 'フランス語', 'ロシア語', 'ポルトガル語', 'スペイン語',
-    "       \ 'ドイツ語', 'イタリア語', ]
-    "
-    " call rabbit_ui#panel([
-    "       \ ['Computer Languages', s:com],
-    "       \ ['Alphabets', s:alp],
-    "       \ ['Spoken Languages', repeat(s:spo, 10)],
-    "       \ ])
+let s:com = [
+      \ 'Dart', 'JavaScript', 'Vim script', 'Go', 'C', 'C++', 'Java', 'Perl',
+      \ 'Ruby', 'Python', 'Haskell', 'HTML', 'css', 'Lisp', 'COBOL', 'Scheme',
+      \ 'Scala', 'Lua', 'CoffeeScript', 'Common Lisp', 'Erlang',
+      \ 'Elixir', 'Ada', 'Type Script', ]
+let s:alp = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J' ]
+call rabbit_ui#panel([
+      \ ['Computer Languages', s:com],
+      \ ['Alphabets', s:alp],
+      \ ])
 
-    " echo strdisplaywidth(rabbit_ui#helper#smart_split('あi', 4)[0])
-    " let s:text = rabbit_ui#helper#smart_split('あiあa', 5)[0]
-    " let s:len = len(substitute(s:text, ".", "x", "g"))
-    " echo s:len
+" echo strdisplaywidth(rabbit_ui#helper#smart_split('あi', 4)[0])
+" let s:text = rabbit_ui#helper#smart_split('あiあa', 5)[0]
+" let s:len = len(substitute(s:text, ".", "x", "g"))
+" echo s:len

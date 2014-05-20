@@ -66,6 +66,8 @@ This is Rich UI Vim script Library.
 * `k` key: up cursor.
 * `h` key: move cursor to left panel.
 * `l` key: move cursor to right panel.
+* `H` key: move selected item to left panel.
+* `L` key: move selected item to right panel.
 * `q` key: quit panel.
 * `g` key: move cursor to first item.
 * `G` key: move cursor to last item.
