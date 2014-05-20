@@ -93,7 +93,8 @@ function! s:wrapper_f_panel(option)
       endif
 
     elseif char2nr('H') is c_nr
-      if 0 < selected_pane_index
+      let size = len(a:option['text_items'][selected_pane_index])
+      if 0 < size && 0 < selected_pane_index
         let from_selected_index = a:option['item_index'][selected_pane_index]
         let to_selected_index = a:option['item_index'][selected_pane_index - 1]
         let item = a:option['text_items'][selected_pane_index][from_selected_index]
@@ -108,7 +109,8 @@ function! s:wrapper_f_panel(option)
       endif
 
     elseif char2nr('L') is c_nr
-      if selected_pane_index < a:option['split_size'] - 1
+      let size = len(a:option['text_items'][selected_pane_index])
+      if 0 < size && selected_pane_index < a:option['split_size'] - 1
         let from_selected_index = a:option['item_index'][selected_pane_index]
         let to_selected_index = a:option['item_index'][selected_pane_index + 1]
         let item = a:option['text_items'][selected_pane_index][from_selected_index]
