@@ -5,6 +5,26 @@ endfunction
 function! rabbit_ui#helper#exception(msg)
   throw printf('[%s] %s', rabbit_ui#helper#id(), a:msg)
 endfunction
+function! rabbit_ui#helper#set_common_options(option)
+  let option = a:option
+
+  let option['box_top'] = abs(get(option, 'box_top', &lines / 4 * 1))
+  let option['box_bottom'] = abs(get(option, 'box_bottom', &lines / 4 * 3))
+  if option['box_bottom'] < option['box_top']
+    call rabbit_ui#helper#exception('rabbit_ui#choices: box_top is larger than box_bottom.')
+  endif
+
+  let option['box_left'] = abs(get(option, 'box_left', &columns / 4 * 1))
+  let option['box_right'] = abs(get(option, 'box_right', &columns / 4 * 3))
+  if option['box_right'] < option['box_left']
+    call rabbit_ui#helper#exception('rabbit_ui#choices: box_left is larger than box_right.')
+  endif
+
+  let option['box_width'] = option['box_right'] - option['box_left'] + 1
+  let option['box_height'] = option['box_bottom'] - option['box_top'] + 1
+
+  return option
+endfunction
 function! rabbit_ui#helper#redraw_line(line_num, box_left, text)
   let orgline = getline(a:line_num)
   let line = orgline . repeat(' ', &columns - strdisplaywidth(orgline))
