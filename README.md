@@ -34,8 +34,8 @@ This is Rich UI Vim script Library.
 
 *Keys in Choices*
 
-* `j` key: down cursor.
-* `k` key: up cursor.
+* `j` key: cursor down.
+* `k` key: cursor up.
 * `q` key: quit choices.
 * `g` key: move cursor to first item.
 * `G` key: move cursor to last item.
@@ -62,8 +62,8 @@ This is Rich UI Vim script Library.
 
 *Keys in Choices*
 
-* `j` key: down cursor.
-* `k` key: up cursor.
+* `j` key: cursor down.
+* `k` key: cursor up.
 * `h` key: move cursor to left panel.
 * `l` key: move cursor to right panel.
 * `H` key: move selected item to left panel.
@@ -150,7 +150,7 @@ This is Rich UI Vim script Library.
 ![](https://raw.github.com/rbtnn/rabbit-ui.vim/master/gridview.png)
 
 
-*Keys in Choices*
+*Keys in GridView*
 
 * `j` key: cursor down.
 * `k` key: cursor up.
@@ -163,18 +163,9 @@ This is Rich UI Vim script Library.
 *SampleCode*
 
     echo rabbit_ui#gridview([
-          \ ['','A','B','C'],
-          \ ['1',  5,  5,  6],
-          \ ['2',  7,  8,  9],
-          \ ['3',  7,  8,  9],
+          \ [1,2,3],
+          \ [4,5,6],
+          \ [7,8,9],
           \ ])
-    " [
-    "   ['', 'A', 'B', 'C'],
-    "   ['1', 5, 5, 6],
-    "   ['2', 7, 8, 9],
-    "   ['3', 7, 8, 9],
-    "   ['', '', '', '', '', '', '234523'],
-    "   [],
-    "   ['', '', '', '', 'hoge', '', '', '', 'vim']
-    " ]
+    " [[1, 2, 3], [4, 5, 6], [7, 8, 9, 'foo'], ['', 'hoge']]
 
