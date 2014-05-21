@@ -86,6 +86,7 @@ function! rabbit_ui#helper#wrapper(funcname, option)
     normal gg
 
     setlocal nolist
+    setlocal nowrap
     setlocal nospell
     setlocal nonumber
     setlocal nohlsearch
