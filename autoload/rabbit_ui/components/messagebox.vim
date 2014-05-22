@@ -46,9 +46,9 @@ function! s:redraw_messagebox(option)
     if line_num is (box_top + 1)
       call rabbit_ui#helper#set_highlight('rabbituiTitleLine', line_num, box_left + 1, len)
     elseif line_num is (box_bottom + 1)
-      call rabbit_ui#helper#set_highlight('rabbituiTextLines', line_num, box_left + 1, len)
+      call rabbit_ui#helper#set_highlight('rabbituiTextLinesOdd', line_num, box_left + 1, len)
     else
-      call rabbit_ui#helper#set_highlight('rabbituiTextLines', line_num, box_left + 1, len)
+      call rabbit_ui#helper#set_highlight('rabbituiTextLinesOdd', line_num, box_left + 1, len)
     endif
   endfor
 

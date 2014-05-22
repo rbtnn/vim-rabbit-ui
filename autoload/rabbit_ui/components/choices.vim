@@ -81,7 +81,11 @@ function! s:redraw_choices(option)
     elseif line_num is (box_top + 1) + 1 + index - display_offset
       call rabbit_ui#helper#set_highlight('rabbituiSelectedItemActive', line_num, (box_left + 1), len)
     else
-      call rabbit_ui#helper#set_highlight('rabbituiTextLines', line_num, (box_left + 1), len)
+      if line_num % 2 is 0
+        call rabbit_ui#helper#set_highlight('rabbituiTextLinesEven', line_num, (box_left + 1), len)
+      else
+        call rabbit_ui#helper#set_highlight('rabbituiTextLinesOdd', line_num, (box_left + 1), len)
+      endif
     endif
   endfor
 

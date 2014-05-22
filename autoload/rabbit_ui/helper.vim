@@ -65,7 +65,6 @@ function! rabbit_ui#helper#smart_split(str, boxwidth)
     let lines += ['']
   endif
 
-
   return lines
 endfunction
 function! rabbit_ui#helper#wrapper(funcname, option)
@@ -112,22 +111,17 @@ function! rabbit_ui#helper#clear_highlights()
   call s:clear_highlight('rabbituiTitleLine')
   call s:clear_highlight('rabbituiSelectedItemActive')
   call s:clear_highlight('rabbituiSelectedItemNoActive')
-  call s:clear_highlight('rabbituiTextLines')
+  call s:clear_highlight('rabbituiTextLinesOdd')
+  call s:clear_highlight('rabbituiTextLinesEven')
 endfunction
 function! rabbit_ui#helper#set_highlight(prefix_groupname, line, col, size)
-  let table = {
-        \   'rabbituiTitleLine' : 'Menu',
-        \   'rabbituiTextLines' : 'Pmenu',
-        \   'rabbituiSelectedItemActive' : 'PmenuSel',
-        \   'rabbituiSelectedItemNoActive' : 'PmenuSbar',
-        \ }
-  if has_key(table, a:prefix_groupname)
-    call s:set_highlight(a:prefix_groupname, table[(a:prefix_groupname)], a:line, a:col, a:size)
-  else
-    call rabbit_ui#helper#exception('rabbit_ui#helper#set_highlight: not support groupname. ' . a:prefix_groupname)
-  endif
+  highlight! rabbituiTitleLine             guifg=#ffffff guibg=#aaaaee gui=bold
+  highlight! rabbituiTextLinesEven          guifg=#000000 guibg=#ddddff gui=none
+  highlight! rabbituiTextLinesOdd          guifg=#000000 guibg=#ffffff gui=none
+  highlight! rabbituiSelectedItemActive    guifg=#ffff00 guibg=#888888 gui=bold
+  highlight! rabbituiSelectedItemNoActive  guifg=#000000 guibg=#bbbbbb gui=none
+  call s:set_highlight(a:prefix_groupname, a:prefix_groupname, a:line, a:col, a:size)
 endfunction
-
 function! s:clear_highlight(prefix_groupname)
   redir => lines
   silent! highlight

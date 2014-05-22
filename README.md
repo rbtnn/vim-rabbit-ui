@@ -60,7 +60,7 @@ This is Rich UI Vim script Library.
 ![](https://raw.github.com/rbtnn/rabbit-ui.vim/master/panel.png)
 
 
-*Keys in Choices*
+*Keys in Panel*
 
 * `j` key: cursor down.
 * `k` key: cursor up.

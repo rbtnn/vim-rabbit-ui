@@ -163,7 +163,6 @@ function! s:redraw_gridview(option, do_redraw)
               \                        col_index + display_col_offset - 1, repeat(' ', split_width))
       endif
 
-
       let len = len(substitute(text, ".", "x", "g"))
 
       if !has_key(offsets, row_index)
@@ -188,7 +187,11 @@ function! s:redraw_gridview(option, do_redraw)
         if col_index is (selected_col + 1 - display_col_offset)
           let gname = 'rabbituiSelectedItemNoActive'
         else
-          let gname = 'rabbituiTextLines'
+          if row_index % 2 is 0
+            let gname = 'rabbituiTextLinesEven'
+          else
+            let gname = 'rabbituiTextLinesOdd'
+          endif
         endif
       endif
 

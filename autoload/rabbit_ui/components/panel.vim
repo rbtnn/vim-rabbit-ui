@@ -172,7 +172,11 @@ function! s:redraw_panel(option, do_redraw)
           let gname = 'rabbituiSelectedItemNoActive'
         endif
       else
-        let gname = 'rabbituiTextLines'
+        if line_num % 2 is 0
+          let gname = 'rabbituiTextLinesEven'
+        else
+          let gname = 'rabbituiTextLinesOdd'
+        endif
       endif
 
       call rabbit_ui#helper#set_highlight(gname, line_num, box_left + 1 + offsets[line_num], len)

@@ -68,5 +68,17 @@ function! rabbit_ui#run_testcases()
         \ [ printf('testcase:%d (TwoPane(B))', testcase_count), spo_items ],
         \ ], option)
   let testcase_count += 1
+  call rabbit_ui#gridview([
+        \ [1,2,3],
+        \ [4,5,6],
+        \ [7,8,9],
+        \ ])
+  let testcase_count += 1
+  call rabbit_ui#gridview([
+        \ [1,2,3],
+        \ [4,5,6],
+        \ [7,8,9],
+        \ ],option)
+  let testcase_count += 1
 endfunction
 
