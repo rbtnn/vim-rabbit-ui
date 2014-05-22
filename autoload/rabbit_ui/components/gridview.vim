@@ -11,7 +11,7 @@ function! rabbit_ui#components#gridview#exec(data, option)
   let option['display_col_size'] = 5
   let option['display_row_size'] = 5
 
-  let option['split_width'] = option['box_width'] / option['display_col_size']
+  let option['split_width'] = (option['box_width'] - (option['display_col_size'] - 2)) / option['display_col_size']
 
   let option['display_row_offset'] = 0
   let option['display_col_offset'] = 0
@@ -152,26 +152,44 @@ function! s:redraw_gridview(option, do_redraw)
   for col_index in range(0, display_col_size - 1)
     for row_index in range(0, display_row_size - 1)
 
-      if col_index is 0 && row_index is 0
-        let text = repeat(' ', split_width)
-      elseif col_index is 0
-        let text = printf('%' . split_width . 'd', row_index + display_row_offset)
-      elseif row_index is 0
-        let text = printf('%' . split_width . 's', s:to_alphabet_title(col_index + display_col_offset - 1))
-      else
-        let text = get(get(fixed_data, row_index + display_row_offset - 1, []),
-              \                        col_index + display_col_offset - 1, repeat(' ', split_width))
-      endif
-
-      let len = len(substitute(text, ".", "x", "g"))
-
       if !has_key(offsets, row_index)
         let offsets[row_index] = 0
       endif
 
-      if a:do_redraw
-        call rabbit_ui#helper#redraw_line(row_index + (box_top + 1), box_left + offsets[row_index], text)
+
+
+      if row_index is 0
+        let gname = 'rabbituiTitleLine'
+      elseif col_index is 0
+        let gname = 'rabbituiTitleLine'
+      elseif row_index is (selected_row + 1 - display_row_offset)
+        if col_index is (selected_col + 1 - display_col_offset)
+          let gname = 'rabbituiSelectedItemNoActive'
+        else
+          let gname = 'rabbituiSelectedItemNoActive'
+        endif
+      else
+        if row_index % 2 is 0
+          let gname = 'rabbituiTextLinesEven'
+        else
+          let gname = 'rabbituiTextLinesOdd'
+        endif
       endif
+
+      if 1 < col_index
+        let text = '|'
+        let len = len(substitute(text, ".", "x", "g"))
+        if a:do_redraw
+          call rabbit_ui#helper#redraw_line(row_index + (box_top + 1), box_left + offsets[row_index], text)
+        endif
+
+        call rabbit_ui#helper#set_highlight(gname, row_index + (box_top + 1),
+              \ box_left + 1 + offsets[row_index], len)
+
+        let offsets[row_index] += len
+      endif
+
+
 
       if row_index is 0
         let gname = 'rabbituiTitleLine'
@@ -195,9 +213,28 @@ function! s:redraw_gridview(option, do_redraw)
         endif
       endif
 
-      call rabbit_ui#helper#set_highlight(gname, row_index + (box_top + 1), box_left + 1 + offsets[row_index], len)
+      if col_index is 0 && row_index is 0
+        let text = repeat(' ', split_width)
+      elseif col_index is 0
+        let text = printf('%' . split_width . 'd', row_index + display_row_offset)
+      elseif row_index is 0
+        let text = printf('%' . split_width . 's', s:to_alphabet_title(col_index + display_col_offset - 1))
+      else
+        let text = get(get(fixed_data, row_index + display_row_offset - 1, []),
+              \                        col_index + display_col_offset - 1, repeat(' ', split_width))
+      endif
+
+      let len = len(substitute(text, ".", "x", "g"))
+
+      if a:do_redraw
+        call rabbit_ui#helper#redraw_line(row_index + (box_top + 1), box_left + offsets[row_index], text)
+      endif
+
+      call rabbit_ui#helper#set_highlight(gname, row_index + (box_top + 1),
+            \ box_left + 1 + offsets[row_index], len)
 
       let offsets[row_index] += split_width
+
     endfor
   endfor
 
