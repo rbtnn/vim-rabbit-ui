@@ -7,7 +7,7 @@ function! rabbit_ui#components#choices#exec(title, items, option)
   let option['display_start'] = 0
   let option['display_last'] = option['box_bottom'] - option['box_top'] - 1
   let option['title'] = rabbit_ui#helper#smart_split(a:title, option['box_width'])[0]
-  let option['text_items'] = map(a:items, 'rabbit_ui#helper#smart_split(v:val, option["box_width"])[0]')
+  let option['text_items'] = map(deepcopy(a:items), 'rabbit_ui#helper#smart_split(v:val, option["box_width"])[0]')
 
   return rabbit_ui#helper#wrapper(function('s:wrapper_f_choices'), option)
 endfunction
