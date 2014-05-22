@@ -18,7 +18,7 @@ function! rabbit_ui#components#gridview#exec(data, option)
 
   let option['data'] = a:data
 
-  return rabbit_ui#helper#wrapper(function('s:wrapper_f_gridview'), option)
+  return rabbit_ui#helper#wrapper(function('g:Wrapper_f_gridview'), option)
 endfunction
 
 function! s:to_alphabet_title(n)
@@ -33,7 +33,7 @@ function! s:to_alphabet_title(n)
   endwhile
   return str
 endfunction
-function! s:wrapper_f_gridview(option)
+function! g:Wrapper_f_gridview(option)
   let background_lines = get(a:option, 'background_lines', [])
   let box_height = a:option['box_height']
 
@@ -146,7 +146,7 @@ function! s:redraw_gridview(option, do_redraw)
     endfor
   endfor
 
-  call rabbit_ui#helper#clear_highlights()
+  call rabbit_ui#helper#clear_highlights(a:option)
 
   let offsets = {}
   for col_index in range(0, display_col_size - 1)
@@ -183,7 +183,7 @@ function! s:redraw_gridview(option, do_redraw)
           call rabbit_ui#helper#redraw_line(row_index + (box_top + 1), box_left + offsets[row_index], text)
         endif
 
-        call rabbit_ui#helper#set_highlight(gname, row_index + (box_top + 1),
+        call rabbit_ui#helper#set_highlight(gname, a:option, row_index + (box_top + 1),
               \ box_left + 1 + offsets[row_index], len)
 
         let offsets[row_index] += len
@@ -230,7 +230,7 @@ function! s:redraw_gridview(option, do_redraw)
         call rabbit_ui#helper#redraw_line(row_index + (box_top + 1), box_left + offsets[row_index], text)
       endif
 
-      call rabbit_ui#helper#set_highlight(gname, row_index + (box_top + 1),
+      call rabbit_ui#helper#set_highlight(gname, a:option, row_index + (box_top + 1),
             \ box_left + 1 + offsets[row_index], len)
 
       let offsets[row_index] += split_width

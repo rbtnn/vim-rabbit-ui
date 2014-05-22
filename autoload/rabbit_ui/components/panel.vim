@@ -21,10 +21,10 @@ function! rabbit_ui#components#panel#exec(title_and_items_list, option)
     let option['text_items'][i] = a:title_and_items_list[i][1]
   endfor
 
-  return rabbit_ui#helper#wrapper(function('s:wrapper_f_panel'), option)
+  return rabbit_ui#helper#wrapper(function('g:Wrapper_f_panel'), option)
 endfunction
 
-function! s:wrapper_f_panel(option)
+function! g:Wrapper_f_panel(option)
   let background_lines = get(a:option, 'background_lines', [])
   let box_height = a:option['box_height']
 
@@ -138,7 +138,7 @@ function! s:redraw_panel(option, do_redraw)
   let split_width = a:option['split_width']
   let split_size = a:option['split_size']
 
-  call rabbit_ui#helper#clear_highlights()
+  call rabbit_ui#helper#clear_highlights(a:option)
 
   let offsets = {}
   for pane_index in range(0, split_size - 1)
@@ -179,7 +179,7 @@ function! s:redraw_panel(option, do_redraw)
         endif
       endif
 
-      call rabbit_ui#helper#set_highlight(gname, line_num, box_left + 1 + offsets[line_num], len)
+      call rabbit_ui#helper#set_highlight(gname, a:option, line_num, box_left + 1 + offsets[line_num], len)
     endfor
   endfor
 

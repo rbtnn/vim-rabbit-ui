@@ -5,16 +5,17 @@ function! rabbit_ui#components#messagebox#exec(title, text, option)
   let option['title'] = rabbit_ui#helper#smart_split(a:title, option['box_width'])[0]
   let option['text_lines'] = rabbit_ui#helper#smart_split(a:text, option['box_width'])
 
-  return rabbit_ui#helper#wrapper(function('s:wrapper_f_messagebox'), option)
+  return rabbit_ui#helper#wrapper(function('g:Wrapper_f_messagebox'), option)
 endfunction
 
-function! s:wrapper_f_messagebox(option)
+function! g:Wrapper_f_messagebox(option)
   let background_lines = get(a:option, 'background_lines', [])
 
   while 1
     % delete _
     silent! put=background_lines
     1 delete _
+
     let rtn_value = s:redraw_messagebox(a:option)
     redraw
 
@@ -36,7 +37,7 @@ function! s:redraw_messagebox(option)
   let box_bottom =  a:option['box_bottom']
   let box_width = a:option['box_width']
 
-  call rabbit_ui#helper#clear_highlights()
+  call rabbit_ui#helper#clear_highlights(a:option)
 
   for line_num in range(box_top + 1, box_bottom + 1)
     let text = get([title] + text_lines, (line_num - (box_top + 1)), repeat(' ', box_width))
@@ -44,13 +45,14 @@ function! s:redraw_messagebox(option)
     let len = len(substitute(text, ".", "x", "g"))
 
     if line_num is (box_top + 1)
-      call rabbit_ui#helper#set_highlight('rabbituiTitleLine', line_num, box_left + 1, len)
+      call rabbit_ui#helper#set_highlight('rabbituiTitleLine', a:option, line_num, box_left + 1, len)
     elseif line_num is (box_bottom + 1)
-      call rabbit_ui#helper#set_highlight('rabbituiTextLinesOdd', line_num, box_left + 1, len)
+      call rabbit_ui#helper#set_highlight('rabbituiTextLinesOdd', a:option, line_num, box_left + 1, len)
     else
-      call rabbit_ui#helper#set_highlight('rabbituiTextLinesOdd', line_num, box_left + 1, len)
+      call rabbit_ui#helper#set_highlight('rabbituiTextLinesOdd', a:option, line_num, box_left + 1, len)
     endif
   endfor
 
   return 0
 endfunction
+

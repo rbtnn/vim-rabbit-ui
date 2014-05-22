@@ -1,6 +1,12 @@
 
+let s:component_id = 0
+
 function! rabbit_ui#helper#id()
   return 'rabbit-ui'
+endfunction
+function! rabbit_ui#helper#get_uniq_component_id()
+  let s:component_id += 1
+  return s:component_id
 endfunction
 function! rabbit_ui#helper#exception(msg)
   throw printf('[%s] %s', rabbit_ui#helper#id(), a:msg)
@@ -22,6 +28,8 @@ function! rabbit_ui#helper#set_common_options(option)
 
   let option['box_width'] = option['box_right'] - option['box_left'] + 1
   let option['box_height'] = option['box_bottom'] - option['box_top'] + 1
+
+  let option['component_id'] = rabbit_ui#helper#get_uniq_component_id()
 
   call s:init_highlights(option)
 
@@ -90,6 +98,7 @@ function! rabbit_ui#helper#wrapper(funcname, option)
     setlocal nowrap
     setlocal nospell
     setlocal nonumber
+    setlocal norelativenumber
     setlocal nohlsearch
     setlocal buftype=nofile nobuflisted noswapfile bufhidden=hide
     setfiletype rabbit-ui
@@ -100,6 +109,7 @@ function! rabbit_ui#helper#wrapper(funcname, option)
           \   'background_lines' : background_lines,
           \ })])
   finally
+    call rabbit_ui#helper#clear_highlights(a:option)
     tabclose
     let &l:hlsearch = saved_hlsearch
     let &l:titlestring = saved_titlestring
@@ -109,15 +119,18 @@ function! rabbit_ui#helper#wrapper(funcname, option)
 
   return rtn_value
 endfunction
-function! rabbit_ui#helper#clear_highlights()
-  call s:clear_highlight('rabbituiTitleLine')
-  call s:clear_highlight('rabbituiSelectedItemActive')
-  call s:clear_highlight('rabbituiSelectedItemNoActive')
-  call s:clear_highlight('rabbituiTextLinesOdd')
-  call s:clear_highlight('rabbituiTextLinesEven')
+
+function! rabbit_ui#helper#clear_highlights(option)
+  if has_key(a:option, 'component_id')
+    call s:clear_highlight('rabbituiTitleLine', a:option['component_id'])
+    call s:clear_highlight('rabbituiSelectedItemActive', a:option['component_id'])
+    call s:clear_highlight('rabbituiSelectedItemNoActive', a:option['component_id'])
+    call s:clear_highlight('rabbituiTextLinesOdd', a:option['component_id'])
+    call s:clear_highlight('rabbituiTextLinesEven', a:option['component_id'])
+  endif
 endfunction
-function! rabbit_ui#helper#set_highlight(prefix_groupname, line, col, size)
-  let groupname = printf('%s_%d_%d_%d', a:prefix_groupname, a:line, a:col, a:size)
+function! rabbit_ui#helper#set_highlight(prefix_groupname, option, line, col, size)
+  let groupname = printf('%s_%d_%d_%d_%d', a:prefix_groupname, a:option['component_id'], a:line, a:col, a:size)
   execute printf('syntax match %s /\%%%dl\%%%dv.\{%d,%d}/ containedin=ALL', groupname, a:line, a:col, a:size, a:size)
   execute printf('highlight! default link %s %s', groupname, a:prefix_groupname)
 endfunction
@@ -125,27 +138,45 @@ function! s:init_highlights(option)
   let highlights = get(a:option, 'highlights', [])
 
   let default_table = {
-        \   'rabbituiTitleLine' : { 'guifg' : '#ffffff', 'guibg' : '#aaaaee', 'gui' : 'bold' },
-        \   'rabbituiTextLinesEven' : { 'guifg' : '#000000', 'guibg' : '#ddddff', 'gui' : 'none' },
-        \   'rabbituiTextLinesOdd' : { 'guifg' : '#000000', 'guibg' : '#ffffff', 'gui' : 'none' },
-        \   'rabbituiSelectedItemActive' : { 'guifg' : '#ffff00', 'guibg' : '#888888', 'gui' : 'bold' },
-        \   'rabbituiSelectedItemNoActive' : { 'guifg' : '#000000', 'guibg' : '#bbbbbb', 'gui' : 'none' },
+        \   'rabbituiTitleLine' : {
+        \     'guifg' : '#ffffff', 'guibg' : '#aaaaee', 'gui' : 'bold',
+        \     'ctermfg' : 'White', 'ctermbg' : 'Blue', 'cterm' : 'bold',
+        \   },
+        \   'rabbituiTextLinesEven' : {
+        \     'guifg' : '#000000', 'guibg' : '#ddddff', 'gui' : 'none',
+        \     'ctermfg' : 'Black', 'ctermbg' : 'LightRed', 'cterm' : 'bold',
+        \   },
+        \   'rabbituiTextLinesOdd' : {
+        \     'guifg' : '#000000', 'guibg' : '#ffffff', 'gui' : 'none',
+        \     'ctermfg' : 'Black', 'ctermbg' : 'White', 'cterm' : 'bold',
+        \   },
+        \   'rabbituiSelectedItemActive' : {
+        \     'guifg' : '#ffff00', 'guibg' : '#888888', 'gui' : 'bold',
+        \     'ctermfg' : 'Yellow', 'ctermbg' : 'Gray', 'cterm' : 'bold',
+        \   },
+        \   'rabbituiSelectedItemNoActive' : {
+        \     'guifg' : '#000000', 'guibg' : '#bbbbbb', 'gui' : 'none',
+        \     'ctermfg' : 'Black', 'ctermbg' : 'LightGray', 'cterm' : 'bold',
+        \   },
         \ }
   for x in keys(default_table)
-    execute printf('highlight! %s guifg=%s guibg=%s gui=%s',
+    execute printf('highlight! %s guifg=%s guibg=%s gui=%s ctermfg=%s ctermbg=%s cterm=%s',
           \   x,
           \   get(get(highlights, x, {}), 'guifg', default_table[x]['guifg']),
           \   get(get(highlights, x, {}), 'guibg', default_table[x]['guibg']),
-          \   get(get(highlights, x, {}), 'gui', default_table[x]['gui'])
+          \   get(get(highlights, x, {}), 'gui', default_table[x]['gui']),
+          \   get(get(highlights, x, {}), 'ctermfg', default_table[x]['ctermfg']),
+          \   get(get(highlights, x, {}), 'ctermbg', default_table[x]['ctermbg']),
+          \   get(get(highlights, x, {}), 'cterm', default_table[x]['cterm'])
           \ )
   endfor
 endfunction
-function! s:clear_highlight(prefix_groupname)
+function! s:clear_highlight(prefix_groupname, component_id)
   redir => lines
   silent! highlight
   redir END
   for line in split(lines, "\n")
-    let m = matchlist(line, printf('\(%s.*\)\s\+xxx links to', a:prefix_groupname))
+    let m = matchlist(line, printf('\(%s_%d_.*\)\s\+xxx links to', a:prefix_groupname, a:component_id))
     if !empty(m)
       try
         execute printf('syntax clear %s', m[1])

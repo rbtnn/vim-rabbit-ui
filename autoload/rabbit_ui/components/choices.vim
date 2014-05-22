@@ -9,10 +9,10 @@ function! rabbit_ui#components#choices#exec(title, items, option)
   let option['title'] = rabbit_ui#helper#smart_split(a:title, option['box_width'])[0]
   let option['text_items'] = map(deepcopy(a:items), 'rabbit_ui#helper#smart_split(v:val, option["box_width"])[0]')
 
-  return rabbit_ui#helper#wrapper(function('s:wrapper_f_choices'), option)
+  return rabbit_ui#helper#wrapper(function('g:Wrapper_f_choices'), option)
 endfunction
 
-function! s:wrapper_f_choices(option)
+function! g:Wrapper_f_choices(option)
   let background_lines = get(a:option, 'background_lines', [])
 
   while 1
@@ -67,7 +67,7 @@ function! s:redraw_choices(option)
   let title = a:option['title']
   let text_items = a:option['text_items'][(display_offset):(display_offset + a:option['box_height'])]
 
-  call rabbit_ui#helper#clear_highlights()
+  call rabbit_ui#helper#clear_highlights(a:option)
 
   for line_num in range(box_top + 1, box_bottom + 1)
     let text = get([title] + text_items, (line_num - (box_top + 1)), repeat(' ', box_width))
@@ -77,14 +77,14 @@ function! s:redraw_choices(option)
     let len = len(substitute(text, ".", "x", "g"))
 
     if line_num is (box_top + 1)
-      call rabbit_ui#helper#set_highlight('rabbituiTitleLine', line_num, (box_left + 1), len)
+      call rabbit_ui#helper#set_highlight('rabbituiTitleLine', a:option, line_num, (box_left + 1), len)
     elseif line_num is (box_top + 1) + 1 + index - display_offset
-      call rabbit_ui#helper#set_highlight('rabbituiSelectedItemActive', line_num, (box_left + 1), len)
+      call rabbit_ui#helper#set_highlight('rabbituiSelectedItemActive', a:option, line_num, (box_left + 1), len)
     else
       if line_num % 2 is 0
-        call rabbit_ui#helper#set_highlight('rabbituiTextLinesEven', line_num, (box_left + 1), len)
+        call rabbit_ui#helper#set_highlight('rabbituiTextLinesEven', a:option, line_num, (box_left + 1), len)
       else
-        call rabbit_ui#helper#set_highlight('rabbituiTextLinesOdd', line_num, (box_left + 1), len)
+        call rabbit_ui#helper#set_highlight('rabbituiTextLinesOdd', a:option, line_num, (box_left + 1), len)
       endif
     endif
   endfor
