@@ -23,6 +23,8 @@ function! rabbit_ui#helper#set_common_options(option)
   let option['box_width'] = option['box_right'] - option['box_left'] + 1
   let option['box_height'] = option['box_bottom'] - option['box_top'] + 1
 
+  call s:init_highlights(option)
+
   return option
 endfunction
 function! rabbit_ui#helper#redraw_line(line_num, box_left, text)
@@ -115,12 +117,28 @@ function! rabbit_ui#helper#clear_highlights()
   call s:clear_highlight('rabbituiTextLinesEven')
 endfunction
 function! rabbit_ui#helper#set_highlight(prefix_groupname, line, col, size)
-  highlight! rabbituiTitleLine             guifg=#ffffff guibg=#aaaaee gui=bold
-  highlight! rabbituiTextLinesEven          guifg=#000000 guibg=#ddddff gui=none
-  highlight! rabbituiTextLinesOdd          guifg=#000000 guibg=#ffffff gui=none
-  highlight! rabbituiSelectedItemActive    guifg=#ffff00 guibg=#888888 gui=bold
-  highlight! rabbituiSelectedItemNoActive  guifg=#000000 guibg=#bbbbbb gui=none
-  call s:set_highlight(a:prefix_groupname, a:prefix_groupname, a:line, a:col, a:size)
+  let groupname = printf('%s_%d_%d_%d', a:prefix_groupname, a:line, a:col, a:size)
+  execute printf('syntax match %s /\%%%dl\%%%dv.\{%d,%d}/ containedin=ALL', groupname, a:line, a:col, a:size, a:size)
+  execute printf('highlight! default link %s %s', groupname, a:prefix_groupname)
+endfunction
+function! s:init_highlights(option)
+  let highlights = get(a:option, 'highlights', [])
+
+  let default_table = {
+        \   'rabbituiTitleLine' : { 'guifg' : '#ffffff', 'guibg' : '#aaaaee', 'gui' : 'bold' },
+        \   'rabbituiTextLinesEven' : { 'guifg' : '#000000', 'guibg' : '#ddddff', 'gui' : 'none' },
+        \   'rabbituiTextLinesOdd' : { 'guifg' : '#000000', 'guibg' : '#ffffff', 'gui' : 'none' },
+        \   'rabbituiSelectedItemActive' : { 'guifg' : '#ffff00', 'guibg' : '#888888', 'gui' : 'bold' },
+        \   'rabbituiSelectedItemNoActive' : { 'guifg' : '#000000', 'guibg' : '#bbbbbb', 'gui' : 'none' },
+        \ }
+  for x in keys(default_table)
+    execute printf('highlight! %s guifg=%s guibg=%s gui=%s',
+          \   x,
+          \   get(get(highlights, x, {}), 'guifg', default_table[x]['guifg']),
+          \   get(get(highlights, x, {}), 'guibg', default_table[x]['guibg']),
+          \   get(get(highlights, x, {}), 'gui', default_table[x]['gui'])
+          \ )
+  endfor
 endfunction
 function! s:clear_highlight(prefix_groupname)
   redir => lines
@@ -136,10 +154,5 @@ function! s:clear_highlight(prefix_groupname)
       endtry
     endif
   endfor
-endfunction
-function! s:set_highlight(prefix_groupname, link_groupname, line, col, size)
-  let groupname = printf('%s_%d_%d_%d', a:prefix_groupname, a:line, a:col, a:size)
-  execute printf('syntax match %s /\%%%dl\%%%dv.\{%d,%d}/ containedin=ALL', groupname, a:line, a:col, a:size, a:size)
-  execute printf('highlight! default link %s %s', groupname, a:link_groupname)
 endfunction
 
