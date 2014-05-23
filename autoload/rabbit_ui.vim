@@ -2,83 +2,177 @@
 scriptencoding utf-8
 
 function! rabbit_ui#messagebox(title, text, ...)
-  let option = ( 0 < a:0 ) ? (type(a:1) is type({}) ? a:1 : {}) : {}
-  return rabbit_ui#components#messagebox#exec(a:title, a:text, option)
+  let config = ( 0 < a:0 ) ? (type(a:1) is type({}) ? a:1 : {}) : {}
+  let config['keymap'] = get(config, 'keymap', {})
+  let default_keymap = rabbit_ui#components#messagebox#get_default_keymap()
+  call extend(config['keymap'], default_keymap, 'keep')
+  let context_list = rabbit_ui#exec_components([
+        \   { 'component_name' : 'messagebox',
+        \     'arguments' : [(a:title), (a:text)],
+        \     'config' : config,
+        \   }])
+  if empty(context_list)
+    return {}
+  else
+    return { 'value' : [] }
+  endif
 endfunction
 function! rabbit_ui#choices(title, items, ...)
-  let option = ( 0 < a:0 ) ? (type(a:1) is type({}) ? a:1 : {}) : {}
-  return rabbit_ui#components#choices#exec(a:title, a:items, option)
+  let config = ( 0 < a:0 ) ? (type(a:1) is type({}) ? a:1 : {}) : {}
+  let config['keymap'] = get(config, 'keymap', {})
+  let default_keymap = rabbit_ui#components#choices#get_default_keymap()
+  call extend(config['keymap'], default_keymap, 'keep')
+  let context_list = rabbit_ui#exec_components([
+        \   { 'component_name' : 'choices',
+        \     'arguments' : [(a:title), (a:items)],
+        \     'config' : config,
+        \   }])
+  if empty(context_list)
+    return {}
+  else
+    return { 'value' : context_list[0]['config']['index'] }
+  endif
 endfunction
 function! rabbit_ui#panel(title_and_items_list, ...)
-  let option = ( 0 < a:0 ) ? (type(a:1) is type({}) ? a:1 : {}) : {}
-  return rabbit_ui#components#panel#exec(a:title_and_items_list, option)
+  let config = ( 0 < a:0 ) ? (type(a:1) is type({}) ? a:1 : {}) : {}
+  let config['keymap'] = get(config, 'keymap', {})
+  let default_keymap = rabbit_ui#components#panel#get_default_keymap()
+  call extend(config['keymap'], default_keymap, 'keep')
+  let context_list = rabbit_ui#exec_components([
+        \   { 'component_name' : 'panel',
+        \     'arguments' : [(a:title_and_items_list)],
+        \     'config' : config,
+        \   }])
+  if empty(context_list)
+    return {}
+  else
+    let item_index = context_list[0]['config']['item_index']
+    let text_items = context_list[0]['config']['text_items']
+    let xs = []
+    for key in sort(keys(item_index))
+      let xs += [[item_index[key], text_items[key]]]
+    endfor
+    return { 'value' : xs }
+  endif
 endfunction
 function! rabbit_ui#gridview(data, ...)
-  let option = ( 0 < a:0 ) ? (type(a:1) is type({}) ? a:1 : {}) : {}
-  return rabbit_ui#components#gridview#exec(a:data, option)
+  let config = ( 0 < a:0 ) ? (type(a:1) is type({}) ? a:1 : {}) : {}
+  let config['keymap'] = get(config, 'keymap', {})
+  let default_keymap = rabbit_ui#components#gridview#get_default_keymap()
+  call extend(config['keymap'], default_keymap, 'keep')
+  let context_list = rabbit_ui#exec_components([
+        \   { 'component_name' : 'gridview',
+        \     'arguments' : [(a:data)],
+        \     'config' : config,
+        \   }])
+  if empty(context_list)
+    return {}
+  else
+    return { 'value' : context_list[0]['config']['data'] }
+  endif
 endfunction
 
-function! rabbit_ui#run_testcases()
-  let option = {
-        \   'box_top' : 0,
-        \   'box_bottom' : 20,
-        \   'box_right' : 25,
-        \   'box_left' : 0,
-        \ }
+function! rabbit_ui#exec_components(context_list)
+  let context_list = deepcopy(a:context_list)
 
-  let com_items = [
-        \ 'Dart', 'JavaScript', 'Vim script', 'Go', 'C', 'C++', 'Java', 'Perl',
-        \ 'Ruby', 'Python', 'Haskell', 'HTML', 'css', 'Lisp', 'COBOL', 'Scheme',
-        \ 'Scala', 'Lua', 'CoffeeScript', 'Common Lisp', 'Erlang',
-        \ 'Elixir', 'Ada', 'Type Script', ]
-  let com_items = repeat(com_items, 100)
-  for idx in range(0, len(com_items) - 1)
-    let com_items[idx] = printf('%d. %s', idx, com_items[idx])
-  endfor
+  let saved_laststatus = &laststatus
+  let saved_statusline = &statusline
+  let saved_hlsearch = &hlsearch
+  let saved_currtabindex = tabpagenr()
+  let saved_titlestring = &titlestring
+  let rtn_value = ''
+  try
+    let background_lines = []
+    for line in getline(line('w0'), line('w0') + &lines) + repeat([''], &lines)
+      let background_lines += [
+            \ join(map(split(line,'\zs'), 'strdisplaywidth(v:val) isnot 1 ? ".." : v:val'), '')
+            \ ]
+    endfor
 
-  let spo_items = [
-        \ '英語', '中国語', '韓国語', 'フランス語', 'ロシア語', 'ポルトガル語', 'スペイン語',
-        \ 'ドイツ語', 'イタリア語', ]
-  let spo_items = repeat(spo_items, 100)
-  for idx in range(0, len(spo_items) - 1)
-    let spo_items[idx] = printf('%d. %s', idx, spo_items[idx])
-  endfor
+    tabnew
+    normal gg
 
-  let testcase_count = 1
-  for items in [spo_items,com_items]
-    let text = join(items, ', ')
-    call rabbit_ui#messagebox(printf('testcase:%d (MessageBox)', testcase_count), text)
-    let testcase_count += 1
-    call rabbit_ui#messagebox(printf('testcase:%d (MessageBox)', testcase_count), text, option)
-    let testcase_count += 1
-    call rabbit_ui#choices(printf('testcase:%d (Choices)', testcase_count), items)
-    let testcase_count += 1
-    call rabbit_ui#choices(printf('testcase:%d (Choices)', testcase_count), items, option)
-    let testcase_count += 1
-  endfor
-  call rabbit_ui#panel([
-        \ [ printf('testcase:%d', testcase_count), com_items ],
-        \ [ 'A', spo_items ],
-        \ [ 'B', com_items ],
-        \ [ 'C', spo_items ],
-        \ ])
-  let testcase_count += 1
-  call rabbit_ui#panel([
-        \ [ printf('testcase:%d (TwoPane(A))', testcase_count), com_items ],
-        \ [ printf('testcase:%d (TwoPane(B))', testcase_count), spo_items ],
-        \ ], option)
-  let testcase_count += 1
-  call rabbit_ui#gridview([
-        \ [1,2,3],
-        \ [4,5,6],
-        \ [7,8,9],
-        \ ])
-  let testcase_count += 1
-  call rabbit_ui#gridview([
-        \ [1,2,3],
-        \ [4,5,6],
-        \ [7,8,9],
-        \ ],option)
-  let testcase_count += 1
+    setlocal nolist
+    setlocal nowrap
+    setlocal nospell
+    setlocal nonumber
+    setlocal norelativenumber
+    setlocal nohlsearch
+    setlocal laststatus=2
+    setlocal buftype=nofile nobuflisted noswapfile bufhidden=hide
+    let &l:statusline = ' '
+    let &l:filetype = rabbit_ui#helper#id()
+    let &l:titlestring = printf('[%s]', rabbit_ui#helper#id())
+
+
+
+    let componentname_list = rabbit_ui#helper#get_componentname_list()
+    let active_window_index = 0
+
+    for context in context_list
+      if -1 isnot index(componentname_list, context['component_name'])
+        call rabbit_ui#components#{context['component_name']}#init(context)
+      endif
+    endfor
+
+    let c_nr = ''
+    while ! empty(context_list)
+      call rabbit_ui#helper#clear_highlights(context_list)
+
+      let keyevent_arg1 = {
+            \   'status' : 'redraw',
+            \   'context_list' : context_list,
+            \   'active_window_index' : active_window_index,
+            \ }
+      let context = context_list[active_window_index]
+      if !has_key(context['config'], 'keymap')
+        let context['config']['keymap'] =
+              \ rabbit_ui#components#{context['component_name']}#get_default_keymap()
+      endif
+      if has_key(context['config']['keymap'], c_nr)
+        call call(context['config']['keymap'][c_nr], [keyevent_arg1])
+      endif
+      let context_list = keyevent_arg1['context_list']
+      let active_window_index = keyevent_arg1['active_window_index']
+      let status = keyevent_arg1['status']
+      if status is 'break'
+        break
+      elseif status is 'continue'
+        let c_nr = ''
+        continue
+      endif
+
+      let lines = deepcopy(background_lines)
+
+      for idx in range(0, len(context_list) - 1)
+        let context_list[idx]['is_active'] = idx is active_window_index
+      endfor
+
+      for context in context_list
+        if -1 isnot index(componentname_list, context['component_name'])
+          call rabbit_ui#components#{context['component_name']}#redraw(lines, context)
+        endif
+      endfor
+
+      % delete _
+      silent! put=lines
+      1 delete _
+
+      redraw
+
+      let c_nr = getchar()
+    endwhile
+  finally
+    call rabbit_ui#helper#clear_highlights(context_list)
+    tabclose
+    let &l:laststatus = saved_laststatus
+    let &l:statusline = saved_statusline
+    let &l:hlsearch = saved_hlsearch
+    let &l:titlestring = saved_titlestring
+    execute 'tabnext' . saved_currtabindex
+    redraw
+  endtry
+
+  return context_list
 endfunction
 

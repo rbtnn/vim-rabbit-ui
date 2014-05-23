@@ -1,152 +1,68 @@
 
-function! rabbit_ui#components#gridview#exec(data, option)
-  let option = rabbit_ui#helper#set_common_options(a:option)
-
-  let option['display_start'] = 0
-  let option['display_last'] = option['box_bottom'] - option['box_top'] - 1
-
-  let option['selected_col'] = 0
-  let option['selected_row'] = 0
-
-  let option['display_col_size'] = 5
-  let option['display_row_size'] = 5
-
-  let option['split_width'] = (option['box_width'] - (option['display_col_size'] - 2)) / option['display_col_size']
-
-  let option['display_row_offset'] = 0
-  let option['display_col_offset'] = 0
-
-  let option['data'] = a:data
-
-  return rabbit_ui#helper#wrapper(function('g:Wrapper_f_gridview'), option)
+function! s:getSID()
+  return matchstr(expand('<sfile>'), '<SNR>\d\+_\zegetSID$')
 endfunction
+let s:SID = s:getSID()
 
-function! s:to_alphabet_title(n)
-  let n = a:n
-  let str = ''
-  while 1
-    let str = nr2char(0x41 + n % 26) . str
-    let n = n / 26 - 1
-    if n < 0
-      break
-    endif
-  endwhile
-  return str
+
+function! rabbit_ui#components#gridview#init(context)
+  let context = a:context
+  let context['config'] = rabbit_ui#helper#set_common_configs(context['config'])
+
+  let context['config']['display_col_size'] = get(context['config'], 'display_col_size', 5)
+  let context['config']['display_row_size'] = get(context['config'], 'display_row_size', 5)
+  if type(context['config']['display_col_size']) is type([])
+    let percentage_of_width = context['config']['display_col_size']
+    let context['config']['display_col_size'] = len(context['config']['display_col_size'])
+  else
+    let percentage_of_width =
+          \ map(repeat([1], context['config']['display_col_size']), "v:val * 100 / context['config']['display_col_size']")
+  endif
+
+  let context['config']['display_start'] = 0
+  let context['config']['display_last'] = context['config']['box_bottom'] - context['config']['box_top'] - 1
+
+  let context['config']['selected_col'] = 0
+  let context['config']['selected_row'] = 0
+
+  let box_width_sub_border = context['config']['box_width'] - (context['config']['display_col_size'] - 2)
+
+  let context['config']['split_widths'] =
+        \ map(percentage_of_width, 'box_width_sub_border * v:val / 100')
+
+  let context['config']['display_row_offset'] = 0
+  let context['config']['display_col_offset'] = 0
+
+  let context['config']['data'] = deepcopy(context['arguments'][0])
 endfunction
-function! g:Wrapper_f_gridview(option)
-  let background_lines = get(a:option, 'background_lines', [])
-  let box_height = a:option['box_height']
+function! rabbit_ui#components#gridview#redraw(lines, context)
+  let config = a:context['config']
+  let is_active = get(a:context, 'is_active', 0)
 
-  let do_redraw = 1
-  while 1
+  let box_left = config['box_left']
+  let box_right =  config['box_right']
+  let box_top = config['box_top']
+  let box_bottom =  config['box_bottom']
+  let box_height = config['box_height']
 
-    if do_redraw
-      % delete _
-      silent! put=background_lines
-      1 delete _
-    endif
+  let split_widths = config['split_widths']
 
-    let rtn_value = s:redraw_gridview(a:option, do_redraw)
-    redraw
+  let selected_row = config['selected_row']
+  let selected_col = config['selected_col']
 
-    " for edit cell
-    echo ""
+  let display_row_offset = config['display_row_offset']
+  let display_col_offset = config['display_col_offset']
 
-    let do_redraw = 0
+  let display_col_size = config['display_col_size']
+  let display_row_size = config['display_row_size']
 
-    let c_nr = getchar()
-
-    if char2nr('q') is c_nr
-      break
-
-    elseif char2nr('j') is c_nr
-      if (a:option['selected_row'] - a:option['display_row_offset'] + 1) % (a:option['display_row_size'] - 1) is 0
-        let a:option['selected_row'] += 1
-        let a:option['display_row_offset'] += 1
-        let do_redraw = 1
-      elseif (a:option['selected_row'] - a:option['display_row_offset']) < (a:option['display_row_size'] - 1)
-        let a:option['selected_row'] += 1
-      endif
-
-    elseif char2nr('l') is c_nr
-      if (a:option['selected_col'] - a:option['display_col_offset'] + 1) % (a:option['display_col_size'] - 1) is 0
-        let a:option['selected_col'] += 1
-        let a:option['display_col_offset'] += 1
-        let do_redraw = 1
-      elseif (a:option['selected_col'] - a:option['display_col_offset']) < (a:option['display_col_size'] - 1)
-        let a:option['selected_col'] += 1
-      endif
-
-    elseif char2nr('k') is c_nr
-      if a:option['selected_row'] is 0
-        " do nothing
-      elseif (a:option['selected_row'] + 1 - a:option['display_row_offset'] - 1) % a:option['display_row_size'] is 0
-        let a:option['selected_row'] -= 1
-        let a:option['display_row_offset'] -= 1
-        let do_redraw = 1
-      elseif 0 < a:option['selected_row']
-        let a:option['selected_row'] -= 1
-      endif
-
-    elseif char2nr('h') is c_nr
-      if a:option['selected_col'] is 0
-        " do nothing
-      elseif (a:option['selected_col'] + 1 - a:option['display_col_offset'] - 1) % a:option['display_col_size'] is 0
-        let a:option['selected_col'] -= 1
-        let a:option['display_col_offset'] -= 1
-        let do_redraw = 1
-      elseif 0 <  a:option['selected_col']
-        let a:option['selected_col'] -= 1
-      endif
-
-    elseif char2nr('e') is c_nr
-      let selected_col = a:option['selected_col']
-      let selected_row = a:option['selected_row']
-      let text = get(get(a:option['data'], selected_row, []), selected_col, '')
-
-      while len(a:option['data']) <= selected_row
-        let a:option['data'] += [[]]
-      endwhile
-      while len(a:option['data'][selected_row]) <= selected_col
-        let a:option['data'][selected_row] += ['']
-      endwhile
-
-      redraw!
-      let a:option['data'][selected_row][selected_col] = input('>', text)
-      let do_redraw = 1
-
-    endif
-  endwhile
-
-  return rtn_value
-endfunction
-function! s:redraw_gridview(option, do_redraw)
-  let box_left = a:option['box_left']
-  let box_right =  a:option['box_right']
-  let box_top = a:option['box_top']
-  let box_bottom =  a:option['box_bottom']
-  let box_height = a:option['box_height']
-
-  let split_width = a:option['split_width']
-
-  let selected_row = a:option['selected_row']
-  let selected_col = a:option['selected_col']
-
-  let display_row_offset = a:option['display_row_offset']
-  let display_col_offset = a:option['display_col_offset']
-
-  let display_col_size = a:option['display_col_size']
-  let display_row_size = a:option['display_row_size']
-
-  let fixed_data = deepcopy(a:option['data'])
+  let fixed_data = deepcopy(config['data'])
 
   for row_data in fixed_data
     for col_index in range(0, len(row_data) - 1)
-      let row_data[col_index] = rabbit_ui#helper#smart_split( row_data[col_index], split_width)[0]
+      let row_data[col_index] = rabbit_ui#helper#smart_split( row_data[col_index], split_widths[col_index + 1])[0]
     endfor
   endfor
-
-  call rabbit_ui#helper#clear_highlights(a:option)
 
   let offsets = {}
   for col_index in range(0, display_col_size - 1)
@@ -158,10 +74,12 @@ function! s:redraw_gridview(option, do_redraw)
 
 
 
-      if row_index is 0
-        let gname = 'rabbituiTitleLine'
-      elseif col_index is 0
-        let gname = 'rabbituiTitleLine'
+      if (row_index is 0) || (col_index is 0)
+        if is_active
+          let gname = 'rabbituiTitleLineActive'
+        else
+          let gname = 'rabbituiTitleLineNoActive'
+        endif
       elseif row_index is (selected_row + 1 - display_row_offset)
         if col_index is (selected_col + 1 - display_col_offset)
           let gname = 'rabbituiSelectedItemNoActive'
@@ -179,11 +97,9 @@ function! s:redraw_gridview(option, do_redraw)
       if 1 < col_index
         let text = '|'
         let len = len(substitute(text, ".", "x", "g"))
-        if a:do_redraw
-          call rabbit_ui#helper#redraw_line(row_index + (box_top + 1), box_left + offsets[row_index], text)
-        endif
+        call rabbit_ui#helper#redraw_line(a:lines, row_index + (box_top + 1), box_left + offsets[row_index], text)
 
-        call rabbit_ui#helper#set_highlight(gname, a:option, row_index + (box_top + 1),
+        call rabbit_ui#helper#set_highlight(gname, config, row_index + (box_top + 1),
               \ box_left + 1 + offsets[row_index], len)
 
         let offsets[row_index] += len
@@ -191,10 +107,12 @@ function! s:redraw_gridview(option, do_redraw)
 
 
 
-      if row_index is 0
-        let gname = 'rabbituiTitleLine'
-      elseif col_index is 0
-        let gname = 'rabbituiTitleLine'
+      if (row_index is 0) || (col_index is 0)
+        if is_active
+          let gname = 'rabbituiTitleLineActive'
+        else
+          let gname = 'rabbituiTitleLineNoActive'
+        endif
       elseif row_index is (selected_row + 1 - display_row_offset)
         if col_index is (selected_col + 1 - display_col_offset)
           let gname = 'rabbituiSelectedItemActive'
@@ -214,30 +132,125 @@ function! s:redraw_gridview(option, do_redraw)
       endif
 
       if col_index is 0 && row_index is 0
-        let text = repeat(' ', split_width)
+        let text = repeat(' ', split_widths[col_index])
       elseif col_index is 0
-        let text = printf('%' . split_width . 'd', row_index + display_row_offset)
+        let text = printf('%' . split_widths[col_index] . 'd', row_index + display_row_offset)
       elseif row_index is 0
-        let text = printf('%' . split_width . 's', s:to_alphabet_title(col_index + display_col_offset - 1))
+        let text = printf('%' . split_widths[col_index] . 's', rabbit_ui#helper#to_alphabet_title(col_index + display_col_offset - 1))
       else
         let text = get(get(fixed_data, row_index + display_row_offset - 1, []),
-              \                        col_index + display_col_offset - 1, repeat(' ', split_width))
+              \                        col_index + display_col_offset - 1, repeat(' ', split_widths[col_index]))
       endif
 
       let len = len(substitute(text, ".", "x", "g"))
 
-      if a:do_redraw
-        call rabbit_ui#helper#redraw_line(row_index + (box_top + 1), box_left + offsets[row_index], text)
-      endif
+      call rabbit_ui#helper#redraw_line(a:lines, row_index + (box_top + 1), box_left + offsets[row_index], text)
 
-      call rabbit_ui#helper#set_highlight(gname, a:option, row_index + (box_top + 1),
+      call rabbit_ui#helper#set_highlight(gname, config, row_index + (box_top + 1),
             \ box_left + 1 + offsets[row_index], len)
 
-      let offsets[row_index] += split_width
+      let offsets[row_index] +=  split_widths[col_index]
 
     endfor
   endfor
-
-  return a:option['data']
 endfunction
 
+function! s:keyevent_cursor_up(...)
+  let keyevent_arg1 = a:1
+  let context_list = keyevent_arg1['context_list']
+  let active_window_index = keyevent_arg1['active_window_index']
+  let config = context_list[active_window_index]['config']
+
+  if config['selected_row'] is 0
+    " do nothing
+  elseif (config['selected_row'] + 1 - config['display_row_offset'] - 1) % config['display_row_size'] is 0
+    let config['selected_row'] -= 1
+    let config['display_row_offset'] -= 1
+  elseif 0 < config['selected_row']
+    let config['selected_row'] -= 1
+  endif
+endfunction
+function! s:keyevent_cursor_down(...)
+  let keyevent_arg1 = a:1
+  let context_list = keyevent_arg1['context_list']
+  let active_window_index = keyevent_arg1['active_window_index']
+  let config = context_list[active_window_index]['config']
+
+  if (config['selected_row'] - config['display_row_offset'] + 1) % (config['display_row_size'] - 1) is 0
+    let config['selected_row'] += 1
+    let config['display_row_offset'] += 1
+  elseif (config['selected_row'] - config['display_row_offset']) < (config['display_row_size'] - 1)
+    let config['selected_row'] += 1
+  endif
+endfunction
+function! s:keyevent_cursor_left(...)
+  let keyevent_arg1 = a:1
+  let context_list = keyevent_arg1['context_list']
+  let active_window_index = keyevent_arg1['active_window_index']
+  let config = context_list[active_window_index]['config']
+
+  if config['selected_col'] is 0
+    " do nothing
+  elseif (config['selected_col'] + 1 - config['display_col_offset'] - 1) % config['display_col_size'] is 0
+    let config['selected_col'] -= 1
+    let config['display_col_offset'] -= 1
+  elseif 0 <  config['selected_col']
+    let config['selected_col'] -= 1
+  endif
+endfunction
+function! s:keyevent_cursor_right(...)
+  let keyevent_arg1 = a:1
+  let context_list = keyevent_arg1['context_list']
+  let active_window_index = keyevent_arg1['active_window_index']
+  let config = context_list[active_window_index]['config']
+
+  if (config['selected_col'] - config['display_col_offset'] + 1) % (config['display_col_size'] - 1) is 0
+    let config['selected_col'] += 1
+    let config['display_col_offset'] += 1
+  elseif (config['selected_col'] - config['display_col_offset']) < (config['display_col_size'] - 1)
+    let config['selected_col'] += 1
+  endif
+endfunction
+function! s:keyevent_edit_cell(...)
+  let keyevent_arg1 = a:1
+  let context_list = keyevent_arg1['context_list']
+  let active_window_index = keyevent_arg1['active_window_index']
+  let config = context_list[active_window_index]['config']
+
+  let selected_col = config['selected_col']
+  let selected_row = config['selected_row']
+  let text = get(get(config['data'], selected_row, []), selected_col, '')
+
+  while len(config['data']) <= selected_row
+    let config['data'] += [[]]
+  endwhile
+  while len(config['data'][selected_row]) <= selected_col
+    let config['data'][selected_row] += ['']
+  endwhile
+
+  redraw!
+  let config['data'][selected_row][selected_col] = input('>', text)
+endfunction
+
+function! rabbit_ui#components#gridview#get_keymap()
+  return {
+        \   'cursor_up' : function(s:SID . 'keyevent_cursor_up'),
+        \   'cursor_down' : function(s:SID . 'keyevent_cursor_down'),
+        \   'cursor_left' : function(s:SID . 'keyevent_cursor_left'),
+        \   'cursor_right' : function(s:SID . 'keyevent_cursor_right'),
+        \   'edit_cell' : function(s:SID . 'keyevent_edit_cell'),
+        \ }
+endfunction
+function! rabbit_ui#components#gridview#get_default_keymap()
+  let keymap = rabbit_ui#keymap#get()
+  return {
+        \   char2nr('q') : keymap['common']['quit_window'],
+        \   char2nr("\<cr>") : keymap['common']['enter'],
+        \   char2nr(' ') : keymap['common']['focus_next_window'],
+        \   char2nr('k') : keymap['gridview']['cursor_up'],
+        \   char2nr('j') : keymap['gridview']['cursor_down'],
+        \   char2nr('h') : keymap['gridview']['cursor_left'],
+        \   char2nr('l') : keymap['gridview']['cursor_right'],
+        \   char2nr('e') : keymap['gridview']['edit_cell'],
+        \ }
+endfunction

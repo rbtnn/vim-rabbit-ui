@@ -1,58 +1,55 @@
 
-function! rabbit_ui#components#messagebox#exec(title, text, option)
-  let option = rabbit_ui#helper#set_common_options(a:option)
-
-  let option['title'] = rabbit_ui#helper#smart_split(a:title, option['box_width'])[0]
-  let option['text_lines'] = rabbit_ui#helper#smart_split(a:text, option['box_width'])
-
-  return rabbit_ui#helper#wrapper(function('g:Wrapper_f_messagebox'), option)
+function! s:getSID()
+  return matchstr(expand('<sfile>'), '<SNR>\d\+_\zegetSID$')
 endfunction
+let s:SID = s:getSID()
 
-function! g:Wrapper_f_messagebox(option)
-  let background_lines = get(a:option, 'background_lines', [])
 
-  while 1
-    % delete _
-    silent! put=background_lines
-    1 delete _
-
-    let rtn_value = s:redraw_messagebox(a:option)
-    redraw
-
-    let c_nr = getchar()
-
-    if char2nr('q') is c_nr
-      break
-    endif
-  endwhile
-
-  return rtn_value
+function! rabbit_ui#components#messagebox#init(context)
+  let context = a:context
+  let context['config'] = rabbit_ui#helper#set_common_configs(context['config'])
+  let context['config']['title'] = rabbit_ui#helper#smart_split(context['arguments'][0], context['config']['box_width'])[0]
+  let context['config']['text_lines'] = rabbit_ui#helper#smart_split(context['arguments'][1], context['config']['box_width'])
 endfunction
-function! s:redraw_messagebox(option)
-  let title = a:option['title']
-  let text_lines = a:option['text_lines']
-  let box_left = a:option['box_left']
-  let box_right =  a:option['box_right']
-  let box_top = a:option['box_top']
-  let box_bottom =  a:option['box_bottom']
-  let box_width = a:option['box_width']
+function! rabbit_ui#components#messagebox#redraw(lines, context)
+  let config = a:context['config']
+  let is_active = get(a:context, 'is_active', 0)
 
-  call rabbit_ui#helper#clear_highlights(a:option)
+  let title = config['title']
+  let text_lines = config['text_lines']
+  let box_left = config['box_left']
+  let box_right =  config['box_right']
+  let box_top = config['box_top']
+  let box_bottom =  config['box_bottom']
+  let box_width = config['box_width']
 
   for line_num in range(box_top + 1, box_bottom + 1)
     let text = get([title] + text_lines, (line_num - (box_top + 1)), repeat(' ', box_width))
-    call rabbit_ui#helper#redraw_line(line_num, box_left, text)
+    call rabbit_ui#helper#redraw_line(a:lines, line_num, box_left, text)
     let len = len(substitute(text, ".", "x", "g"))
 
     if line_num is (box_top + 1)
-      call rabbit_ui#helper#set_highlight('rabbituiTitleLine', a:option, line_num, box_left + 1, len)
+      if is_active
+        call rabbit_ui#helper#set_highlight('rabbituiTitleLineActive', config, line_num, box_left + 1, len)
+      else
+        call rabbit_ui#helper#set_highlight('rabbituiTitleLineNoActive', config, line_num, box_left + 1, len)
+      endif
     elseif line_num is (box_bottom + 1)
-      call rabbit_ui#helper#set_highlight('rabbituiTextLinesOdd', a:option, line_num, box_left + 1, len)
+      call rabbit_ui#helper#set_highlight('rabbituiTextLinesOdd', config, line_num, box_left + 1, len)
     else
-      call rabbit_ui#helper#set_highlight('rabbituiTextLinesOdd', a:option, line_num, box_left + 1, len)
+      call rabbit_ui#helper#set_highlight('rabbituiTextLinesOdd', config, line_num, box_left + 1, len)
     endif
   endfor
-
-  return 0
 endfunction
 
+function! rabbit_ui#components#messagebox#get_keymap()
+  return {}
+endfunction
+function! rabbit_ui#components#messagebox#get_default_keymap()
+  let keymap = rabbit_ui#keymap#get()
+  return {
+        \   char2nr('q') : keymap['common']['quit_window'],
+        \   char2nr("\<cr>") : keymap['common']['enter'],
+        \   char2nr(' ') : keymap['common']['focus_next_window'],
+        \ }
+endfunction
