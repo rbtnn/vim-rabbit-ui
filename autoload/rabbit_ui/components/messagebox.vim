@@ -13,7 +13,8 @@ function! rabbit_ui#components#messagebox#init(context)
 endfunction
 function! rabbit_ui#components#messagebox#redraw(lines, context)
   let config = a:context['config']
-  let is_active = get(a:context, 'is_active', 0)
+  let focused = rabbit_ui#helper#windowstatus(a:context, 'focused')
+  let nonactivate = rabbit_ui#helper#windowstatus(a:context, 'nonactivate')
 
   let title = config['title']
   let text_lines = config['text_lines']
@@ -24,18 +25,16 @@ function! rabbit_ui#components#messagebox#redraw(lines, context)
   let box_width = config['box_width']
 
   for line_num in range(box_top + 1, box_bottom + 1)
-    let text = get([title] + text_lines, (line_num - (box_top + 1)), repeat(' ', box_width))
+    let text = get((nonactivate ? [] : [title]) + text_lines, (line_num - (box_top + 1)), repeat(' ', box_width))
     call rabbit_ui#helper#redraw_line(a:lines, line_num, box_left, text)
     let len = len(substitute(text, ".", "x", "g"))
 
-    if line_num is (box_top + 1)
-      if is_active
+    if line_num is (box_top + 1) && !nonactivate
+      if focused
         call rabbit_ui#helper#set_highlight('rabbituiTitleLineActive', config, line_num, box_left + 1, len)
       else
         call rabbit_ui#helper#set_highlight('rabbituiTitleLineNoActive', config, line_num, box_left + 1, len)
       endif
-    elseif line_num is (box_bottom + 1)
-      call rabbit_ui#helper#set_highlight('rabbituiTextLinesOdd', config, line_num, box_left + 1, len)
     else
       call rabbit_ui#helper#set_highlight('rabbituiTextLinesOdd', config, line_num, box_left + 1, len)
     endif

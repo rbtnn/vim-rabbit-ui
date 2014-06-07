@@ -107,6 +107,13 @@ function! rabbit_ui#exec_components(context_list)
 
     let componentname_list = rabbit_ui#helper#get_componentname_list()
     let active_window_index = 0
+    for context in context_list
+      if ! rabbit_ui#helper#windowstatus(context, 'nonactivate')
+        break
+      else
+        let active_window_index += 1
+      endif
+    endfor
 
     for context in context_list
       if -1 isnot index(componentname_list, context['component_name'])
@@ -115,7 +122,11 @@ function! rabbit_ui#exec_components(context_list)
     endfor
 
     let c_nr = ''
-    while ! empty(context_list)
+    while 1
+      if len(filter(deepcopy(context_list), '! rabbit_ui#helper#windowstatus(v:val, "nonactivate")')) is 0
+        break
+      endif
+
       let keyevent_arg1 = {
             \   'status' : 'redraw',
             \   'context_list' : context_list,
@@ -146,7 +157,11 @@ function! rabbit_ui#exec_components(context_list)
       let lines = deepcopy(background_lines)
 
       for idx in range(0, len(context_list) - 1)
-        let context_list[idx]['is_active'] = idx is active_window_index
+        if ! has_key(context_list[idx], 'windowstatus')
+          let context_list[idx]['windowstatus'] = {}
+        endif
+        let context_list[idx]['windowstatus']['focused'] = idx is active_window_index
+        call vimconsole#log(context_list[idx]['windowstatus']['focused'])
       endfor
 
       for context in context_list

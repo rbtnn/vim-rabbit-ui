@@ -30,7 +30,8 @@ function! rabbit_ui#components#panel#init(context)
 endfunction
 function! rabbit_ui#components#panel#redraw(lines, context)
   let config = a:context['config']
-  let is_active = get(a:context, 'is_active', 0)
+  let focused = rabbit_ui#helper#windowstatus(a:context, 'focused')
+  let nonactivate = rabbit_ui#helper#windowstatus(a:context, 'nonactivate')
 
   let box_left = config['box_left']
   let box_right =  config['box_right']
@@ -50,7 +51,7 @@ function! rabbit_ui#components#panel#redraw(lines, context)
 
     for line_num in range(box_top + 1, box_bottom + 1)
 
-      let text = get([title] + fixed_text_items, (line_num - (box_top + 1)), repeat(' ', split_width))
+      let text = get((nonactivate ? [] : [title]) + fixed_text_items, (line_num - (box_top + 1)), repeat(' ', split_width))
 
       let len = len(substitute(text, ".", "x", "g"))
 
@@ -62,8 +63,8 @@ function! rabbit_ui#components#panel#redraw(lines, context)
 
       call rabbit_ui#helper#redraw_line(a:lines, line_num, box_left + offsets[line_num], text)
 
-      if line_num is (box_top + 1)
-        if is_active
+      if line_num is (box_top + 1) && !nonactivate
+        if focused
           let gname = 'rabbituiTitleLineActive'
         else
           let gname = 'rabbituiTitleLineNoActive'

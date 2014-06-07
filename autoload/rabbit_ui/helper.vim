@@ -5,6 +5,15 @@ endfunction
 function! rabbit_ui#helper#exception(msg)
   throw printf('[%s] %s', rabbit_ui#helper#id(), a:msg)
 endfunction
+function! rabbit_ui#helper#windowstatus(context, name)
+  if a:name is 'nonactivate'
+    return get(get(a:context, 'windowstatus', {}), a:name, 0)
+  elseif a:name is 'focused'
+    return get(get(a:context, 'windowstatus', {}), a:name, 0)
+  else
+    call rabbit_ui#helper#exception('unknown windowstatus:' . a:name)
+  endif
+endfunction
 function! rabbit_ui#helper#get_componentname_list()
   let r = split(&runtimepath, ',')
   call map(r, "globpath(v:val, 'autoload/rabbit_ui/components/*.vim')")

@@ -9,12 +9,12 @@ function! rabbit_ui#components#gridview#init(context)
   let context = a:context
   call rabbit_ui#helper#set_common_configs(context['config'])
 
+  let context['config']['display_row_size'] = context['config']['box_bottom'] - context['config']['box_top'] + 1
+  let context['config']['display_col_size'] = get(context['config'], 'display_col_size', 5)
+
   if context['config']['display_col_size'] < 2
     call rabbit_ui#helper#exception('gridview: display_col_size isnot greater than 1')
   endif
-
-  let context['config']['display_row_size'] = context['config']['box_bottom'] - context['config']['box_top'] + 1
-  let context['config']['display_col_size'] = get(context['config'], 'display_col_size', 5)
 
   if !has_key(context['config'], 'percentage_of_width')
     let percentage_of_width =
@@ -51,7 +51,7 @@ function! rabbit_ui#components#gridview#init(context)
 endfunction
 function! rabbit_ui#components#gridview#redraw(lines, context)
   let config = a:context['config']
-  let is_active = get(a:context, 'is_active', 0)
+  let focused = rabbit_ui#helper#windowstatus(a:context, 'focused')
 
   let box_left = config['box_left']
   let box_right =  config['box_right']
@@ -89,7 +89,7 @@ function! rabbit_ui#components#gridview#redraw(lines, context)
 
 
       if (row_index is 0) || (col_index is 0)
-        if is_active
+        if focused
           let gname = 'rabbituiTitleLineActive'
         else
           let gname = 'rabbituiTitleLineNoActive'
@@ -122,7 +122,7 @@ function! rabbit_ui#components#gridview#redraw(lines, context)
 
 
       if (row_index is 0) || (col_index is 0)
-        if is_active
+        if focused
           let gname = 'rabbituiTitleLineActive'
         else
           let gname = 'rabbituiTitleLineNoActive'

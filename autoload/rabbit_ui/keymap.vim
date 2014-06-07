@@ -10,7 +10,7 @@ function! s:keyevent_quit_window(...)
   let active_window_index = keyevent_arg1['active_window_index']
   call rabbit_ui#helper#clear_matches(context_list[active_window_index])
   call remove(context_list, active_window_index)
-  let keyevent_arg1['active_window_index'] = len(context_list) - 1
+  call s:keyevent_focus_next_window(a:1)
   let keyevent_arg1['status'] = 'continue'
 endfunction
 function! s:keyevent_enter(...)
@@ -19,8 +19,15 @@ function! s:keyevent_enter(...)
 endfunction
 function! s:keyevent_focus_next_window(...)
   let keyevent_arg1 = a:1
-  let keyevent_arg1['active_window_index'] =
-        \ (keyevent_arg1['active_window_index'] + 1) % len(keyevent_arg1['context_list'])
+  let prev_active_window_index = keyevent_arg1['active_window_index']
+  let keyevent_arg1['active_window_index'] = 0
+  for idx in range(1, len(keyevent_arg1['context_list']))
+    let next_idx = (prev_active_window_index + idx) % len(keyevent_arg1['context_list'])
+    if ! rabbit_ui#helper#windowstatus(keyevent_arg1['context_list'][next_idx], 'nonactivate')
+      let keyevent_arg1['active_window_index'] = next_idx
+      break
+    endif
+  endfor
 endfunction
 
 function! rabbit_ui#keymap#get()
