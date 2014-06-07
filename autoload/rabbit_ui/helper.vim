@@ -5,21 +5,6 @@ endfunction
 function! rabbit_ui#helper#exception(msg)
   throw printf('[%s] %s', rabbit_ui#helper#id(), a:msg)
 endfunction
-function! rabbit_ui#helper#debug(context_list)
-  let context = get(a:context_list, 0, {})
-  if !empty(context)
-    let &l:statusline = printf('[DEBUG]component_name:%s,top:%d,bottom:%d,left:%d,right:%d,columns:%d,lines:%d',
-          \ context.component_name,
-          \ context.config.box_top,
-          \ context.config.box_bottom,
-          \ context.config.box_left,
-          \ context.config.box_right,
-          \ &columns,
-          \ &lines)
-  else
-    let &l:statusline = printf('[DEBUG] empty')
-  endif
-endfunction
 function! rabbit_ui#helper#get_componentname_list()
   let r = split(&runtimepath, ',')
   call map(r, "globpath(v:val, 'autoload/rabbit_ui/components/*.vim')")
@@ -52,13 +37,17 @@ function! rabbit_ui#helper#set_common_configs(config)
   let config['box_width'] = config['box_right'] - config['box_left'] + 1
   let config['box_height'] = config['box_bottom'] - config['box_top'] + 1
 
-  call s:init_highlights(config)
+  call rabbit_ui#helper#init_highlights({})
 
   return config
 endfunction
+" text
+function! s:padding_right_space(text, width)
+  return a:text . repeat(' ', a:width - strdisplaywidth(a:text))
+endfunction
 function! rabbit_ui#helper#redraw_line(lines, line_num, box_left, text)
   let orgline = a:lines[(a:line_num - 1)]
-  let line = orgline . repeat(' ', &columns - strdisplaywidth(orgline))
+  let line = s:padding_right_space(orgline, &columns)
   let str = rabbit_ui#helper#smart_split(line, a:box_left)[0]
   let str .= a:text
   let str .= line[(strdisplaywidth(str)):]
@@ -77,7 +66,7 @@ function! rabbit_ui#helper#smart_split(str, boxwidth, ...)
     let text = ''
     while cs_index < len(cs)
       if cs[cs_index] is "\n"
-        let text .= repeat(' ', a:boxwidth - strdisplaywidth(text))
+        let text = s:padding_right_space(text, a:boxwidth)
         let lines += [text]
         let text = ''
       elseif strdisplaywidth(text . cs[cs_index]) < a:boxwidth
@@ -115,6 +104,45 @@ function! rabbit_ui#helper#smart_split(str, boxwidth, ...)
 
   return lines
 endfunction
+" layout
+function! rabbit_ui#helper#layout_1(context_list)
+  let context_list = a:context_list
+  let size = len(context_list)
+  let width = { 'start' : &columns * 1 / 4, 'last' : &columns * 3 / 4 }
+  let height = { 'start' : &lines * 1 / 4, 'last' : &lines * 3 / 4 }
+
+  let splited_col_size = 1
+  while splited_col_size * splited_col_size < size
+    let splited_col_size += 1
+  endwhile
+
+  let splited_row_size = 1
+  while splited_row_size * splited_col_size < size
+    let splited_row_size += 1
+  endwhile
+
+  for row in range(0, splited_row_size - 1)
+    for col in range(0, splited_col_size - 1)
+      let index = row * splited_col_size + col
+      if index < size
+        let context = context_list[index]
+        let config = context['config']
+
+        let box_height = (height.last - height.start) / splited_row_size
+        let config['box_top'] = height.start + row * (box_height + 1)
+        let config['box_bottom'] = config['box_top'] + (box_height - 1)
+
+        let box_width = (width.last - width.start) / splited_col_size
+        let config['box_left'] = width.start + col * (box_width + 1)
+        let config['box_right'] = config['box_left'] + (box_width - 1)
+
+        call rabbit_ui#components#{context['component_name']}#init(context)
+      endif
+    endfor
+  endfor
+
+endfunction
+" gridview helper
 function! rabbit_ui#helper#to_alphabet_title(n)
   let n = a:n
   let str = ''
@@ -127,41 +155,24 @@ function! rabbit_ui#helper#to_alphabet_title(n)
   endwhile
   return str
 endfunction
-function! rabbit_ui#helper#clear_highlights(context_list)
-  redir => lines
-  silent! highlight
-  redir END
-  for context in a:context_list
-    let config = context['config']
-    for line in split(lines, "\n")
-      for prefix_groupname in [
-            \   'rabbituiTitleLineActive',
-            \   'rabbituiTitleLineNoActive',
-            \   'rabbituiSelectedItemActive',
-            \   'rabbituiSelectedItemNoActive',
-            \   'rabbituiTextLinesOdd',
-            \   'rabbituiTextLinesEven',
-            \ ]
-
-        let m = matchlist(line, printf('\(%s_.*\)\s\+xxx links to', prefix_groupname))
-        if !empty(m)
-          try
-            execute printf('syntax clear %s', m[1])
-            execute printf('highlight default link %s NONE', m[1])
-          catch /.*/
-          endtry
-        endif
-      endfor
-    endfor
+" highlight
+function! rabbit_ui#helper#clear_matches(context)
+  let config = a:context['config']
+  for id in get(config, 'matches', [])
+    call matchdelete(id)
   endfor
+  let config['matches'] = []
 endfunction
-function! rabbit_ui#helper#set_highlight(prefix_groupname, config, line, col, size)
-  let groupname = printf('%s_%d_%d_%d', a:prefix_groupname, a:line, a:col, a:size)
-  execute printf('syntax match %s /\%%%dl\%%%dv.\{%d,%d}/ containedin=ALL', groupname, a:line, a:col, a:size, a:size)
-  execute printf('highlight! default link %s %s', groupname, a:prefix_groupname)
+function! rabbit_ui#helper#set_highlight(groupname, config, line, col, size)
+  let config = a:config
+  execute printf('highlight! default link %s %s', a:groupname, a:groupname)
+  if !has_key(config, 'matches')
+    let config['matches'] = []
+  endif
+  let config['matches'] += [ matchadd(a:groupname, printf('\%%%dl\%%%dv.\{%d,%d}', a:line, a:col, a:size, a:size)) ]
 endfunction
-function! s:init_highlights(config)
-  let highlights = get(a:config, 'highlights', [])
+function! rabbit_ui#helper#init_highlights(highlights)
+  let highlights = a:highlights
 
   let default_table = {
         \   'rabbituiTitleLineActive' : {

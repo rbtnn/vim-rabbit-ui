@@ -6,8 +6,11 @@ let s:SID = s:getSID()
 
 function! s:keyevent_quit_window(...)
   let keyevent_arg1 = a:1
-  call remove(keyevent_arg1['context_list'], keyevent_arg1['active_window_index'])
-  let keyevent_arg1['active_window_index'] = len(keyevent_arg1['context_list']) - 1
+  let context_list = keyevent_arg1['context_list']
+  let active_window_index = keyevent_arg1['active_window_index']
+  call rabbit_ui#helper#clear_matches(context_list[active_window_index])
+  call remove(context_list, active_window_index)
+  let keyevent_arg1['active_window_index'] = len(context_list) - 1
   let keyevent_arg1['status'] = 'continue'
 endfunction
 function! s:keyevent_enter(...)

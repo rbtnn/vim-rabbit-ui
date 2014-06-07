@@ -116,8 +116,6 @@ function! rabbit_ui#exec_components(context_list)
 
     let c_nr = ''
     while ! empty(context_list)
-      call rabbit_ui#helper#clear_highlights(context_list)
-
       let keyevent_arg1 = {
             \   'status' : 'redraw',
             \   'context_list' : context_list,
@@ -141,6 +139,10 @@ function! rabbit_ui#exec_components(context_list)
         continue
       endif
 
+      for context in context_list
+        call rabbit_ui#helper#clear_matches(context)
+      endfor
+
       let lines = deepcopy(background_lines)
 
       for idx in range(0, len(context_list) - 1)
@@ -162,7 +164,9 @@ function! rabbit_ui#exec_components(context_list)
       let c_nr = getchar()
     endwhile
   finally
-    call rabbit_ui#helper#clear_highlights(context_list)
+    for context in context_list
+      call rabbit_ui#helper#clear_matches(context)
+    endfor
     tabclose
     let &l:laststatus = saved_laststatus
     let &l:statusline = saved_statusline

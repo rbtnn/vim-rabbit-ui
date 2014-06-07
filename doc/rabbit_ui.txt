@@ -154,7 +154,7 @@ Config                                               *rabbit-ui-context-config*
 
 
 * gridview.display_col_size
-  This can have GridView only.
+  This can be had on GridView only.
   Columns size displayed if the type is Number.
   Percentages of component-width splited if the type is [Number].
 >
@@ -165,52 +165,9 @@ Config                                               *rabbit-ui-context-config*
 
 
 * gridview.display_row_size
-  This can have GridView only.
+  This can be had on GridView only.
   Row size displayed if the type is Number.
   (Default: `5`)
-
-
-* highlights.rabbituiTitleLineActive
-  (Default: `{
-  \   'guifg' : '#ffffff', 'guibg' : '#aaaaee', 'gui' : 'bold',
-  \   'ctermfg' : 'White', 'ctermbg' : 'Blue', 'cterm' : 'bold',
-  \ }`)
-
-
-* highlights.rabbituiTitleLineNoActive
-  (Default: `{
-  \   'guifg' : '#ffffff', 'guibg' : '#555555', 'gui' : 'bold',
-  \   'ctermfg' : 'White', 'ctermbg' : 'Blue', 'cterm' : 'bold',
-  \ }`)
-
-
-* highlights.rabbituiTextLinesEven
-  (Default: `{
-  \   'guifg' : '#000000', 'guibg' : '#ddddff', 'gui' : 'none',
-  \   'ctermfg' : 'Black', 'ctermbg' : 'LightRed', 'cterm' : 'bold',
-  \ }`)
-
-
-* highlights.rabbituiTextLinesOdd
-  (Default: `{
-  \   'guifg' : '#000000', 'guibg' : '#ffffff', 'gui' : 'none',
-  \   'ctermfg' : 'Black', 'ctermbg' : 'White', 'cterm' : 'bold',
-  \ }`)
-
-
-* highlights.rabbituiSelectedItemActive
-  (Default: `{
-  \   'guifg' : '#ffff00', 'guibg' : '#888888', 'gui' : 'bold',
-  \   'ctermfg' : 'Yellow', 'ctermbg' : 'Gray', 'cterm' : 'bold',
-  \ }`)
-
-
-* highlights.rabbituiSelectedItemNoActive
-  (Default: `{
-  \   'guifg' : '#000000', 'guibg' : '#bbbbbb', 'gui' : 'none',
-  \   'ctermfg' : 'Black', 'ctermbg' : 'LightGray', 'cterm' : 'bold',
-  \ }`)
-
 
 
 ==============================================================================

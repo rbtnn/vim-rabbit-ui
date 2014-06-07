@@ -10,7 +10,7 @@ function! rabbit_ui#components#gridview#init(context)
   call rabbit_ui#helper#set_common_configs(context['config'])
 
   let context['config']['display_col_size'] = get(context['config'], 'display_col_size', 5)
-  let context['config']['display_row_size'] = get(context['config'], 'display_row_size', 5)
+  let context['config']['display_row_size'] = context['config']['box_bottom'] - context['config']['box_top'] + 1
   if type(context['config']['display_col_size']) is type([])
     let percentage_of_width = context['config']['display_col_size']
     let context['config']['display_col_size'] = len(context['config']['display_col_size'])
