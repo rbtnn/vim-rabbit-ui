@@ -161,7 +161,6 @@ function! rabbit_ui#exec_components(context_list)
           let context_list[idx]['windowstatus'] = {}
         endif
         let context_list[idx]['windowstatus']['focused'] = idx is active_window_index
-        call vimconsole#log(context_list[idx]['windowstatus']['focused'])
       endfor
 
       for context in context_list
