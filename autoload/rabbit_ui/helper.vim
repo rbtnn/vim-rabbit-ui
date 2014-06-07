@@ -25,13 +25,13 @@ function! rabbit_ui#helper#set_common_configs(config)
   let config['box_top'] = abs(get(config, 'box_top', &lines / 4 * 1))
   let config['box_bottom'] = abs(get(config, 'box_bottom', &lines / 4 * 3))
   if config['box_bottom'] < config['box_top']
-    call rabbit_ui#helper#exception('rabbit_ui#choices: box_top is larger than box_bottom.')
+    call rabbit_ui#helper#exception('choices: box_top is larger than box_bottom.')
   endif
 
   let config['box_left'] = abs(get(config, 'box_left', &columns / 4 * 1))
   let config['box_right'] = abs(get(config, 'box_right', &columns / 4 * 3))
   if config['box_right'] < config['box_left']
-    call rabbit_ui#helper#exception('rabbit_ui#choices: box_left is larger than box_right.')
+    call rabbit_ui#helper#exception('choices: box_left is larger than box_right.')
   endif
 
   let config['box_width'] = config['box_right'] - config['box_left'] + 1

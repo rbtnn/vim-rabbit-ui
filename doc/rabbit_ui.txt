@@ -155,13 +155,17 @@ Config                                               *rabbit-ui-context-config*
 
 * gridview.display_col_size
   This can be had on GridView only.
-  Columns size displayed if the type is Number.
-  Percentages of component-width splited if the type is [Number].
+  Columns size displayed.
+  (Default: `5`)
+
+
+* gridview.percentage_of_width 
+  This can be had on GridView only.
+  Percentages of component-width splited by display_col_size.
 >
   component-width = box_right - box_left + 1
 <
   The sum of elements should be 100.
-  (Default: `5`)
 
 
 * gridview.display_row_size

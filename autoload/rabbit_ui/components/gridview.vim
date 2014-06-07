@@ -9,14 +9,33 @@ function! rabbit_ui#components#gridview#init(context)
   let context = a:context
   call rabbit_ui#helper#set_common_configs(context['config'])
 
-  let context['config']['display_col_size'] = get(context['config'], 'display_col_size', 5)
+  if context['config']['display_col_size'] < 2
+    call rabbit_ui#helper#exception('gridview: display_col_size isnot greater than 1')
+  endif
+
   let context['config']['display_row_size'] = context['config']['box_bottom'] - context['config']['box_top'] + 1
-  if type(context['config']['display_col_size']) is type([])
-    let percentage_of_width = context['config']['display_col_size']
-    let context['config']['display_col_size'] = len(context['config']['display_col_size'])
-  else
+  let context['config']['display_col_size'] = get(context['config'], 'display_col_size', 5)
+
+  if !has_key(context['config'], 'percentage_of_width')
     let percentage_of_width =
           \ map(repeat([1], context['config']['display_col_size']), "v:val * 100 / context['config']['display_col_size']")
+  else
+    let percentage_of_width = context['config']['percentage_of_width']
+  endif
+
+  if len(percentage_of_width) isnot context['config']['display_col_size']
+    call rabbit_ui#helper#exception('gridview: length of percentage_of_width isnot display_col_size')
+  endif
+
+  let box_width_sub_border = context['config']['box_width'] - (context['config']['display_col_size'] - 2)
+  let context['config']['split_widths'] = map(deepcopy(percentage_of_width), 'box_width_sub_border * v:val / 100')
+
+  let total = 0
+  for width in context['config']['split_widths']
+    let total += width
+  endfor
+  if total < box_width_sub_border
+    let context['config']['split_widths'][0] += box_width_sub_border - total
   endif
 
   let context['config']['display_start'] = 0
@@ -24,11 +43,6 @@ function! rabbit_ui#components#gridview#init(context)
 
   let context['config']['selected_col'] = 0
   let context['config']['selected_row'] = 0
-
-  let box_width_sub_border = context['config']['box_width'] - (context['config']['display_col_size'] - 2)
-
-  let context['config']['split_widths'] =
-        \ map(percentage_of_width, 'box_width_sub_border * v:val / 100')
 
   let context['config']['display_row_offset'] = 0
   let context['config']['display_col_offset'] = 0
