@@ -7,7 +7,7 @@ let s:SID = s:getSID()
 
 function! rabbit_ui#components#gridview#init(context)
   let context = a:context
-  let context['config'] = rabbit_ui#helper#set_common_configs(context['config'])
+  call rabbit_ui#helper#set_common_configs(context['config'])
 
   let context['config']['display_col_size'] = get(context['config'], 'display_col_size', 5)
   let context['config']['display_row_size'] = get(context['config'], 'display_row_size', 5)

@@ -7,7 +7,7 @@ let s:SID = s:getSID()
 
 function! rabbit_ui#components#panel#init(context)
   let context = a:context
-  let context['config'] = rabbit_ui#helper#set_common_configs(context['config'])
+  call rabbit_ui#helper#set_common_configs(context['config'])
 
   let context['config']['split_size'] = len(context['arguments'][0])
   let context['config']['split_width'] = context['config']['box_width'] / context['config']['split_size']

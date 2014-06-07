@@ -93,7 +93,6 @@ function! rabbit_ui#exec_components(context_list)
     normal gg
 
     setlocal nolist
-    setlocal nowrap
     setlocal nospell
     setlocal nonumber
     setlocal norelativenumber

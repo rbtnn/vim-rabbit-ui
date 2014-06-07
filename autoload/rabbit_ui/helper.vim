@@ -66,7 +66,8 @@ function! rabbit_ui#helper#redraw_line(lines, line_num, box_left, text)
     let a:lines[(a:line_num - 1)] = str
   endif
 endfunction
-function! rabbit_ui#helper#smart_split(str, boxwidth)
+function! rabbit_ui#helper#smart_split(str, boxwidth, ...)
+  let is_wrap = 0 < a:0 ? a:1 : &wrap
   let lines = []
 
   let cs = split(a:str, '\zs')
@@ -75,20 +76,36 @@ function! rabbit_ui#helper#smart_split(str, boxwidth)
   if a:boxwidth isnot 0
     let text = ''
     while cs_index < len(cs)
-      if strdisplaywidth(text . cs[cs_index]) == a:boxwidth
-        let text .= cs[cs_index]
-        let cs_index += 1
+      if cs[cs_index] is "\n"
+        let text .= repeat(' ', a:boxwidth - strdisplaywidth(text))
         let lines += [text]
         let text = ''
       elseif strdisplaywidth(text . cs[cs_index]) < a:boxwidth
         let text .= cs[cs_index]
-        let cs_index += 1
+      elseif strdisplaywidth(text . cs[cs_index]) == a:boxwidth
+        let text .= cs[cs_index]
+        let lines += [text]
+        if is_wrap
+          let text = ''
+        else
+          while get(cs, cs_index, "\n") isnot "\n"
+            let cs_index += 1
+          endwhile
+          continue
+        endif
       elseif strdisplaywidth(text . cs[cs_index]) > a:boxwidth
         let text .= ' '
         let lines += [text]
-        let text = cs[cs_index]
-        let cs_index += 1
+        if is_wrap
+          let text = cs[cs_index]
+        else
+          while get(cs, cs_index, "\n") isnot "\n"
+            let cs_index += 1
+          endwhile
+          continue
+        endif
       endif
+      let cs_index += 1
     endwhile
     let text .= repeat(' ', a:boxwidth - strdisplaywidth(text))
     let lines += [text]

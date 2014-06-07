@@ -7,7 +7,7 @@ let s:SID = s:getSID()
 
 function! rabbit_ui#components#choices#init(context)
   let context = a:context
-  let context['config'] = rabbit_ui#helper#set_common_configs(context['config'])
+  call rabbit_ui#helper#set_common_configs(context['config'])
 
   let context['config']['index'] = 0
   let context['config']['display_offset'] = 0

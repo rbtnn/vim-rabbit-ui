@@ -7,7 +7,7 @@ let s:SID = s:getSID()
 
 function! rabbit_ui#components#messagebox#init(context)
   let context = a:context
-  let context['config'] = rabbit_ui#helper#set_common_configs(context['config'])
+  call rabbit_ui#helper#set_common_configs(a:context['config'])
   let context['config']['title'] = rabbit_ui#helper#smart_split(context['arguments'][0], context['config']['box_width'])[0]
   let context['config']['text_lines'] = rabbit_ui#helper#smart_split(context['arguments'][1], context['config']['box_width'])
 endfunction
@@ -53,3 +53,4 @@ function! rabbit_ui#components#messagebox#get_default_keymap()
         \   char2nr(' ') : keymap['common']['focus_next_window'],
         \ }
 endfunction
+
