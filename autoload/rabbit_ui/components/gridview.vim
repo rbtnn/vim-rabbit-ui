@@ -74,7 +74,8 @@ function! rabbit_ui#components#gridview#redraw(lines, context)
 
   for row_data in fixed_data
     for col_index in range(0, len(row_data) - 1)
-      let row_data[col_index] = rabbit_ui#helper#smart_split( row_data[col_index], split_widths[col_index + 1])[0]
+      let row_data[col_index] = rabbit_ui#helper#smart_split( row_data[col_index],
+            \ get(split_widths, (col_index + 1 - display_col_offset), 0))[0]
     endfor
   endfor
 
