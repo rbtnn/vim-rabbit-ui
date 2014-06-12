@@ -44,7 +44,7 @@ function! rabbit_ui#components#choices#redraw(lines, context)
       else
         call rabbit_ui#helper#set_highlight('rabbituiTitleLineNoActive', config, line_num, (box_left + 1), len)
       endif
-    elseif line_num is (box_top + 1) + 1 + index - display_offset
+    elseif line_num is (box_top + (nonactivate ? 0 : 1)) + 1 + index - display_offset
       call rabbit_ui#helper#set_highlight('rabbituiSelectedItemActive', config, line_num, (box_left + 1), len)
     else
       if line_num % 2 is 0
