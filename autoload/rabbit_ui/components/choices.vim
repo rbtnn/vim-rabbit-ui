@@ -61,8 +61,8 @@ endfunction
 function! s:keyevent_cursor_to_first_item(...)
   let keyevent_arg1 = a:1
   let context_list = keyevent_arg1['context_list']
-  let active_window_index = keyevent_arg1['active_window_index']
-  let config = context_list[active_window_index]['config']
+  let active_window_id = keyevent_arg1['active_window_id']
+  let config = context_list[active_window_id]['config']
 
   let config['index'] = 0
   let config['display_offset'] = 0
@@ -70,8 +70,8 @@ endfunction
 function! s:keyevent_cursor_to_last_item(...)
   let keyevent_arg1 = a:1
   let context_list = keyevent_arg1['context_list']
-  let active_window_index = keyevent_arg1['active_window_index']
-  let config = context_list[active_window_index]['config']
+  let active_window_id = keyevent_arg1['active_window_id']
+  let config = context_list[active_window_id]['config']
 
   let box_height = config['box_height']
   let item_size = len(config['text_items'])
@@ -85,8 +85,8 @@ endfunction
 function! s:keyevent_cursor_up(...)
   let keyevent_arg1 = a:1
   let context_list = keyevent_arg1['context_list']
-  let active_window_index = keyevent_arg1['active_window_index']
-  let config = context_list[active_window_index]['config']
+  let active_window_id = keyevent_arg1['active_window_id']
+  let config = context_list[active_window_id]['config']
 
   if 0 <= config['index'] - 1
     let config['index'] -= 1
@@ -98,8 +98,8 @@ endfunction
 function! s:keyevent_cursor_down(...)
   let keyevent_arg1 = a:1
   let context_list = keyevent_arg1['context_list']
-  let active_window_index = keyevent_arg1['active_window_index']
-  let config = context_list[active_window_index]['config']
+  let active_window_id = keyevent_arg1['active_window_id']
+  let config = context_list[active_window_id]['config']
 
   if config['index'] + 1 <= len(config['text_items']) - 1
     let config['index'] += 1

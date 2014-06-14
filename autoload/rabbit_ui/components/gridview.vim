@@ -173,8 +173,8 @@ endfunction
 function! s:keyevent_cursor_up(...)
   let keyevent_arg1 = a:1
   let context_list = keyevent_arg1['context_list']
-  let active_window_index = keyevent_arg1['active_window_index']
-  let config = context_list[active_window_index]['config']
+  let active_window_id = keyevent_arg1['active_window_id']
+  let config = context_list[active_window_id]['config']
 
   if config['selected_row'] is 0
     " do nothing
@@ -188,8 +188,8 @@ endfunction
 function! s:keyevent_cursor_down(...)
   let keyevent_arg1 = a:1
   let context_list = keyevent_arg1['context_list']
-  let active_window_index = keyevent_arg1['active_window_index']
-  let config = context_list[active_window_index]['config']
+  let active_window_id = keyevent_arg1['active_window_id']
+  let config = context_list[active_window_id]['config']
 
   if (config['selected_row'] - config['display_row_offset'] + 1) % (config['display_row_size'] - 1) is 0
     let config['selected_row'] += 1
@@ -201,8 +201,8 @@ endfunction
 function! s:keyevent_cursor_left(...)
   let keyevent_arg1 = a:1
   let context_list = keyevent_arg1['context_list']
-  let active_window_index = keyevent_arg1['active_window_index']
-  let config = context_list[active_window_index]['config']
+  let active_window_id = keyevent_arg1['active_window_id']
+  let config = context_list[active_window_id]['config']
 
   if config['selected_col'] is 0
     " do nothing
@@ -216,8 +216,8 @@ endfunction
 function! s:keyevent_cursor_right(...)
   let keyevent_arg1 = a:1
   let context_list = keyevent_arg1['context_list']
-  let active_window_index = keyevent_arg1['active_window_index']
-  let config = context_list[active_window_index]['config']
+  let active_window_id = keyevent_arg1['active_window_id']
+  let config = context_list[active_window_id]['config']
 
   if (config['selected_col'] - config['display_col_offset'] + 1) % (config['display_col_size'] - 1) is 0
     let config['selected_col'] += 1
@@ -229,8 +229,8 @@ endfunction
 function! s:keyevent_edit_cell(...)
   let keyevent_arg1 = a:1
   let context_list = keyevent_arg1['context_list']
-  let active_window_index = keyevent_arg1['active_window_index']
-  let config = context_list[active_window_index]['config']
+  let active_window_id = keyevent_arg1['active_window_id']
+  let config = context_list[active_window_id]['config']
 
   let selected_col = config['selected_col']
   let selected_row = config['selected_row']

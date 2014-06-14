@@ -65,7 +65,7 @@ function! rabbit_ui#helper#redraw_line(lines, line_num, box_left, text)
   endif
 endfunction
 function! rabbit_ui#helper#smart_split(str, boxwidth, ...)
-  let is_wrap = 0 < a:0 ? a:1 : &wrap
+  let is_wrap = 0 < a:0 ? a:1 : 1
   let lines = []
 
   let cs = split(a:str, '\zs')
@@ -89,6 +89,7 @@ function! rabbit_ui#helper#smart_split(str, boxwidth, ...)
           while get(cs, cs_index, "\n") isnot "\n"
             let cs_index += 1
           endwhile
+          let text = ''
           continue
         endif
       elseif strdisplaywidth(text . cs[cs_index]) > a:boxwidth
@@ -100,6 +101,7 @@ function! rabbit_ui#helper#smart_split(str, boxwidth, ...)
           while get(cs, cs_index, "\n") isnot "\n"
             let cs_index += 1
           endwhile
+          let text = ''
           continue
         endif
       endif
@@ -112,44 +114,6 @@ function! rabbit_ui#helper#smart_split(str, boxwidth, ...)
   endif
 
   return lines
-endfunction
-" layout
-function! rabbit_ui#helper#layout_1(context_list)
-  let context_list = a:context_list
-  let size = len(context_list)
-  let width = { 'start' : &columns * 1 / 4, 'last' : &columns * 3 / 4 }
-  let height = { 'start' : &lines * 1 / 4, 'last' : &lines * 3 / 4 }
-
-  let splited_col_size = 1
-  while splited_col_size * splited_col_size < size
-    let splited_col_size += 1
-  endwhile
-
-  let splited_row_size = 1
-  while splited_row_size * splited_col_size < size
-    let splited_row_size += 1
-  endwhile
-
-  for row in range(0, splited_row_size - 1)
-    for col in range(0, splited_col_size - 1)
-      let index = row * splited_col_size + col
-      if index < size
-        let context = context_list[index]
-        let config = context['config']
-
-        let box_height = (height.last - height.start) / splited_row_size
-        let config['box_top'] = height.start + row * (box_height + 1)
-        let config['box_bottom'] = config['box_top'] + (box_height - 1)
-
-        let box_width = (width.last - width.start) / splited_col_size
-        let config['box_left'] = width.start + col * (box_width + 1)
-        let config['box_right'] = config['box_left'] + (box_width - 1)
-
-        call rabbit_ui#components#{context['component_name']}#init(context)
-      endif
-    endfor
-  endfor
-
 endfunction
 " gridview helper
 function! rabbit_ui#helper#to_alphabet_title(n)

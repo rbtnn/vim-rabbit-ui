@@ -91,8 +91,8 @@ endfunction
 function! s:keyevent_cursor_to_first_item(...)
   let keyevent_arg1 = a:1
   let context_list = keyevent_arg1['context_list']
-  let active_window_index = keyevent_arg1['active_window_index']
-  let config = context_list[active_window_index]['config']
+  let active_window_id = keyevent_arg1['active_window_id']
+  let config = context_list[active_window_id]['config']
 
   let selected_pane_index = config['selected_pane_index']
   let config['item_index'][selected_pane_index] = 0
@@ -101,8 +101,8 @@ endfunction
 function! s:keyevent_cursor_to_last_item(...)
   let keyevent_arg1 = a:1
   let context_list = keyevent_arg1['context_list']
-  let active_window_index = keyevent_arg1['active_window_index']
-  let config = context_list[active_window_index]['config']
+  let active_window_id = keyevent_arg1['active_window_id']
+  let config = context_list[active_window_id]['config']
 
   let selected_pane_index = config['selected_pane_index']
   let box_height = config['box_height']
@@ -117,8 +117,8 @@ endfunction
 function! s:keyevent_cursor_up(...)
   let keyevent_arg1 = a:1
   let context_list = keyevent_arg1['context_list']
-  let active_window_index = keyevent_arg1['active_window_index']
-  let config = context_list[active_window_index]['config']
+  let active_window_id = keyevent_arg1['active_window_id']
+  let config = context_list[active_window_id]['config']
 
   let selected_pane_index = config['selected_pane_index']
   if 0 <= config['item_index'][selected_pane_index] - 1
@@ -131,8 +131,8 @@ endfunction
 function! s:keyevent_cursor_down(...)
   let keyevent_arg1 = a:1
   let context_list = keyevent_arg1['context_list']
-  let active_window_index = keyevent_arg1['active_window_index']
-  let config = context_list[active_window_index]['config']
+  let active_window_id = keyevent_arg1['active_window_id']
+  let config = context_list[active_window_id]['config']
 
   let selected_pane_index = config['selected_pane_index']
   if config['item_index'][selected_pane_index] + 1 <= len(config['text_items'][selected_pane_index]) - 1
@@ -145,8 +145,8 @@ endfunction
 function! s:keyevent_cursor_left(...)
   let keyevent_arg1 = a:1
   let context_list = keyevent_arg1['context_list']
-  let active_window_index = keyevent_arg1['active_window_index']
-  let config = context_list[active_window_index]['config']
+  let active_window_id = keyevent_arg1['active_window_id']
+  let config = context_list[active_window_id]['config']
 
   let selected_pane_index = config['selected_pane_index']
   if 0 < selected_pane_index
@@ -156,8 +156,8 @@ endfunction
 function! s:keyevent_cursor_right(...)
   let keyevent_arg1 = a:1
   let context_list = keyevent_arg1['context_list']
-  let active_window_index = keyevent_arg1['active_window_index']
-  let config = context_list[active_window_index]['config']
+  let active_window_id = keyevent_arg1['active_window_id']
+  let config = context_list[active_window_id]['config']
 
   let selected_pane_index = config['selected_pane_index']
   if selected_pane_index < config['split_size'] - 1
@@ -167,8 +167,8 @@ endfunction
 function! s:keyevent_move_item_to_left(...)
   let keyevent_arg1 = a:1
   let context_list = keyevent_arg1['context_list']
-  let active_window_index = keyevent_arg1['active_window_index']
-  let config = context_list[active_window_index]['config']
+  let active_window_id = keyevent_arg1['active_window_id']
+  let config = context_list[active_window_id]['config']
 
   let selected_pane_index = config['selected_pane_index']
   let size = len(config['text_items'][selected_pane_index])
@@ -188,8 +188,8 @@ endfunction
 function! s:keyevent_move_item_to_right(...)
   let keyevent_arg1 = a:1
   let context_list = keyevent_arg1['context_list']
-  let active_window_index = keyevent_arg1['active_window_index']
-  let config = context_list[active_window_index]['config']
+  let active_window_id = keyevent_arg1['active_window_id']
+  let config = context_list[active_window_id]['config']
 
   let selected_pane_index = config['selected_pane_index']
   let size = len(config['text_items'][selected_pane_index])
