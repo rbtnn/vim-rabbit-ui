@@ -1,5 +1,5 @@
 
-rabbit-ui.vim
+vim-rabbit-ui
 =============
 
 This is Rich UI Vim script Library.
